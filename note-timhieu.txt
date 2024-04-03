@@ -1,0 +1,12 @@
+1. Tìm hiểu ác công cụ
+1.1. Expo Router: 
+Expo Router là một thư viện điều hướng dựa trên React Navigation, được tối ưu hóa cho việc sử dụng trong các ứng dụng Expo. Nó cung cấp các thành phần và API để tạo các đường dẫn điều hướng, quản lý ngăn xếp màn hình và điều hướng giữa các màn hình trong ứng dụng React Native của bạn.
+
+Reanimated: Reanimated là một thư viện chuyên sâu cho việc tạo hiệu ứng hoạt hình mượt mà và động cơ hoạt hình mạnh mẽ trong React Native. Nó sử dụng JavaScript đang chạy trong luồng chính của ứng dụng để tạo ra các hoạt hình với hiệu suất cao và độ trễ thấp hơn so với các phương pháp hoạt hình truyền thống.
+
+Clerk: Clerk là một thư viện xây dựng sẵn để quản lý xác thực và quản lý người dùng trong ứng dụng React Native. Nó cung cấp một giao diện người dùng đơn giản để đăng nhập, đăng ký và quản lý tài khoản người dùng, cũng như các tính năng bảo mật như xác thực hai yếu tố và quên mật khẩu.
+
+Gestures: Gestures là một thư viện React Native giúp bạn quản lý các cử chỉ và thao tác của người dùng trên màn hình cảm ứng. Nó cung cấp các thành phần và API để nhận diện và xử lý các cử chỉ như vuốt, kéo, nhấn và nhiều hơn nữa, giúp tạo ra các trải nghiệm tương tác mượt mà và dễ sử dụng.
+
+Gifted Chat: Gifted Chat là một thư viện UI React Native được thiết kế đặc biệt cho việc tạo ra các ứng dụng trò chuyện hoặc tin nhắn. Nó cung cấp các thành phần và giao diện người dùng để hiển thị và tương tác với các cuộc trò chuyện, bao gồm các tính năng như gửi tin nhắn, hiển thị tin nhắn trước đó và tùy chỉnh giao diện người dùng.
+

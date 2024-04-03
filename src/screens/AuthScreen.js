@@ -1,37 +1,23 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useState, useRef, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Pressable,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  Dimensions,
-} from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { CheckBox } from "react-native-elements";
-import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
+import { Text, View, Image, TouchableOpacity } from "react-native";
 import SwiperFlatList from "react-native-swiper-flatlist";
-import { TabView, TabBar, SceneMap } from "react-native-tab-view";
-// import i18n from "./src/i18n";
+import { useNavigation } from "@react-navigation/native";
 
-export default function Auth() {
+export default function AuthScreen({ route }) {
   const [isEN, setIsEN] = useState(false);
+  const navigation = useNavigation();
   return (
     <View
       style={{
         width: "100%",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         paddingTop: 5,
         paddingBottom: 5,
+        backgroundColor: "white",
       }}
     >
       {/* Zalo logo */}
@@ -117,7 +103,7 @@ export default function Auth() {
           alignItems: "center",
         }}
       >
-        <View
+        <TouchableOpacity
           style={{
             width: "50%",
             borderRadius: 30,
@@ -127,11 +113,14 @@ export default function Auth() {
             alignItems: "center",
             justifyContent: "center",
           }}
+          onPress={() => {
+            navigation.navigate("LoginScreen", { navigation });
+          }}
         >
           <Text style={{ color: "#fff", fontWeight: 500 }}>
             {isEN ? "LOG IN" : "ĐĂNG NHẬP"}
           </Text>
-        </View>
+        </TouchableOpacity>
         <View
           style={{
             width: "50%",
