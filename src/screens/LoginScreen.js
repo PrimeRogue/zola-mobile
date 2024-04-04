@@ -8,18 +8,18 @@ import {
 } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import { Formik } from "formik";
-import * as yup from "yup"; // Validation library
+import * as yup from "yup";
 import AntDesignIcon from "react-native-vector-icons/AntDesign";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import authAPI from "../api/AuthApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginSchema = yup.object().shape({
+const loginSchema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Please enter email"),
   password: yup.string().required("Password is required"),
 });
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [loginError, setLogInError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +54,7 @@ const LoginScreen = () => {
       style={{
         flex: 1,
         flexDirection: "column",
+        backgroundColor: "white",
       }}
       behavior="padding"
     >
@@ -66,10 +67,12 @@ const LoginScreen = () => {
           alignItems: "baseline",
           gap: 20,
           padding: 20,
-          backgroundColor: "#237BFF",
+          backgroundColor: "teal",
         }}
       >
-        <AntDesignIcon name="arrowleft" size={22} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <AntDesignIcon name="arrowleft" size={22} color="#fff" />
+        </TouchableOpacity>
         <Text style={{ fontSize: 18, color: "white" }}>Đăng nhập</Text>
       </View>
       <View
@@ -89,7 +92,7 @@ const LoginScreen = () => {
 
       <Formik
         initialValues={{ email: "", password: "" }}
-        validationSchema={LoginSchema}
+        validationSchema={loginSchema}
         onSubmit={(values) => handleLogin(values)}
       >
         {({
@@ -142,7 +145,7 @@ const LoginScreen = () => {
             ) : null}
             <Text
               style={{
-                color: "#3293D9",
+                color: "teal",
                 fontWeight: 500,
                 fontSize: 14,
                 marginLeft: 15,
@@ -153,7 +156,7 @@ const LoginScreen = () => {
             </Text>
             <TouchableOpacity
               style={{
-                backgroundColor: "#237BFF",
+                backgroundColor: "teal",
                 margin: 15,
                 padding: 10,
                 borderRadius: 5,
@@ -163,7 +166,7 @@ const LoginScreen = () => {
               }}
               onPress={handleSubmit}
             >
-              <Text style={{ fontSize: 16, color: "white" }}>Login</Text>
+              <Text style={{ fontSize: 16, color: "white" }}>Đăng nhập</Text>
             </TouchableOpacity>
           </View>
         )}

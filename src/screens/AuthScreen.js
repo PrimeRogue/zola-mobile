@@ -21,7 +21,7 @@ export default function AuthScreen({ route }) {
       }}
     >
       {/* Zalo logo */}
-      <Text style={{ fontSize: "40px", color: "#3C7FD7", fontWeight: "bold" }}>
+      <Text style={{ fontSize: "40px", color: "teal", fontWeight: "bold" }}>
         Zola
       </Text>
       {/* Slider */}
@@ -108,7 +108,7 @@ export default function AuthScreen({ route }) {
             width: "50%",
             borderRadius: 30,
             padding: 15,
-            backgroundColor: "#008FFF",
+            backgroundColor: "teal",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -121,21 +121,24 @@ export default function AuthScreen({ route }) {
             {isEN ? "LOG IN" : "ĐĂNG NHẬP"}
           </Text>
         </TouchableOpacity>
-        <View
+        <TouchableOpacity
           style={{
             width: "50%",
             borderRadius: 30,
             padding: 15,
-            backgroundColor: "#008FFF",
+            backgroundColor: "teal",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+          }}
+          onPress={() => {
+            navigation.navigate("RegisterScreen", { navigation });
           }}
         >
           <Text style={{ color: "#fff", fontWeight: 500 }}>
             {isEN ? "SIGN UP" : "ĐĂNG KÝ"}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
       {/* Tab */}
       <View
