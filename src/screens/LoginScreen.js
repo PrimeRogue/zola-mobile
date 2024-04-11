@@ -32,6 +32,7 @@ const LoginScreen = ({ navigation }) => {
       await AsyncStorage.setItem("accessToken", accessToken);
       // Xử lý dữ liệu đăng nhập ở đây
       console.log("Login successful:", data);
+      navigation.navigate("HomeScreen");
     } catch (error) {
       const errorCode = error?.code; // Lấy mã lỗi từ đối tượng lỗi được ném ra
       // Xử lý lỗi nếu có

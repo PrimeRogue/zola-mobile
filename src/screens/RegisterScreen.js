@@ -14,7 +14,7 @@ import authAPI from "../api/AuthApi";
 const RegisterScreen = ({ navigation }) => {
   const [username, setUserName] = useState("");
   const [isValidForm, setIsValidForm] = useState(false);
-
+  const [weakPassword, setWeakPassword] = useState("");
   // validate with yup
   const registerSchema = yup.object().shape({
     password: yup.string().required("Password is required"),
@@ -46,15 +46,14 @@ const RegisterScreen = ({ navigation }) => {
     try {
       // Gọi phương thức register từ đối tượng authAPI
       const response = await authAPI.register(userInfo);
-
+      if (userInfo.email === "buitranthienan1111@gmail.com") setCurrentTab(4);
       // Trả về dữ liệu phản hồi nếu quá trình đăng ký thành công
-      setCurrentTab(3);
+      else setCurrentTab(3);
       return response;
     } catch (error) {
-      const errorCode = error?.code; // Lấy mã lỗi từ đối tượng lỗi được ném ra
       // Xử lý lỗi nếu quá trình đăng ký gặp vấn đề
-      console.error("Error during registration:", error);
-      setCurrentTab(4);
+      if (error.code === "email-already-in-use") setCurrentTab(4);
+      else setCurrentTab(3);
       throw error; // Rethrow lỗi để cho phép các thành phần khác xử lý nếu cần
     }
   };
@@ -87,6 +86,79 @@ const RegisterScreen = ({ navigation }) => {
         <Text style={{ fontSize: 18, color: "white" }}>Tạo tài khoản</Text>
       </View>
       {/* Tab */}
+      {currentTab === 5 && (
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: "bold",
+              textAlign: "center",
+              fontSize: 18,
+              marginTop: 40,
+              marginBottom: 40,
+            }}
+          >
+            Email chưa được xác thực
+          </Text>
+          <View
+            style={{
+              width: 70,
+              height: 70,
+              backgroundColor: "#FF6666",
+              borderRadius: "50%",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 10,
+            }}
+          >
+            <AntDesignIcon name="close" size={30} color="#F0F3FC" />
+          </View>
+          <Text style={{ fontSize: 16, fontWeight: "bold" }}>*****</Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: "teal",
+                borderRadius: 5,
+                padding: 15,
+                width: "100%",
+                marginTop: 40,
+              }}
+              onPress={() => goToPrevTab(2)}
+            >
+              <Text style={{ fontWeight: 500, fontSize: 16, color: "white" }}>
+                Dùng Email khác
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "teal",
+                borderRadius: 5,
+                padding: 15,
+                width: "100%",
+                marginTop: 40,
+              }}
+              onPress={() => navigation.navigate("LoginScreen")}
+            >
+              <Text style={{ fontWeight: 500, fontSize: 16, color: "white" }}>
+                Đăng nhập Email này
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       {currentTab === 4 && (
         <View
           style={{
@@ -203,6 +275,7 @@ const RegisterScreen = ({ navigation }) => {
               width: "100%",
               marginTop: 40,
             }}
+            onPress={() => navigation.navigate("LoginScreen")}
           >
             <Text style={{ fontWeight: 500, fontSize: 16, color: "white" }}>
               Trở về đăng nhập
@@ -303,6 +376,14 @@ const RegisterScreen = ({ navigation }) => {
                     style={{ color: "red", marginLeft: 15, marginBottom: 15 }}
                   >
                     {errors.email || errors.password}
+                    {weakPassword}
+                  </Text>
+                ) : null}
+                {weakPassword !== "" ? (
+                  <Text
+                    style={{ color: "red", marginLeft: 15, marginBottom: 15 }}
+                  >
+                    {weakPassword}
                   </Text>
                 ) : null}
                 <View

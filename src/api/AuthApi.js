@@ -44,26 +44,6 @@ const authAPI = {
       throw error;
     }
   },
-
-  refreshToken: async (refreshToken) => {
-    try {
-      const response = await fetch(`${API_URL}/refresh-token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        throw await response.json();
-      }
-
-      return response.json();
-    } catch (error) {
-      throw error;
-    }
-  },
 };
 
 export default authAPI;

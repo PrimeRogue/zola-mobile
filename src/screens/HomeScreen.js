@@ -20,9 +20,8 @@ import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import SwiperFlatList from "react-native-swiper-flatlist";
 import { TabView, TabBar, SceneMap } from "react-native-tab-view";
-// import i18n from "./src/i18n";
 
-export default function MyCloud() {
+export default function HomeScreen() {
   return (
     <View
       style={{
@@ -53,7 +52,7 @@ export default function MyCloud() {
             gap: 20,
           }}
         >
-          <AntDesignIcon name="arrowleft" size={18} color="#fff" />
+          <AntDesignIcon name="search1" size={18} color="#fff" />
           <Text style={{ color: "#eee", fontSize: 18, fontWeight: 500 }}>
             My Cloud
           </Text>
@@ -134,7 +133,9 @@ export default function MyCloud() {
           }}
         />
         <View>
-          <Text style={{ fontSize: 18, fontWeight: 500 }}>My Cloud</Text>
+          <Text style={{ fontSize: 16, fontWeight: 500, color: "#ccc" }}>
+            Tìm kiếm
+          </Text>
           <Text style={{ fontSize: 16, fontWeight: 500, color: "#848C8F" }}>
             Lorem kid
           </Text>
