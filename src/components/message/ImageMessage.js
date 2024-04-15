@@ -14,11 +14,10 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
         display: "flex",
         flexDirection: "column",
         gap: 5,
-        width: "fit-content",
         alignSelf: "flex-end",
         marginTop: 15,
         marginBottom: 15,
-        maxWidth: "70%",
+        width: "70%",
       }}
     >
       <Lightbox underlayColor="white">
@@ -30,10 +29,7 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
             height: 250,
             maxHeight: "100%",
             borderRadius: 10,
-            resizeMode: "cover",
-            backgroundColor: "teal",
-            borderWidth: 1,
-            borderColor: "#ccc",
+            resizeMode: "contain",
           }}
         />
       </Lightbox>
@@ -48,11 +44,11 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
         gap: 10,
         marginTop: 15,
         marginBottom: 15,
-        maxWidth: "70%",
+        width: "70%",
       }}
     >
       <Image
-        source={require("https://source.unsplash.com/random")}
+        source={content}
         style={{
           width: 50,
           height: 50,
@@ -82,8 +78,8 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
           <Image
             source={content}
             style={{
-              // maxWidth: "100%",
-              // width: "100%",
+              maxWidth: "100%",
+              width: "100%",
               width: 250,
               height: 250,
               borderRadius: 10,

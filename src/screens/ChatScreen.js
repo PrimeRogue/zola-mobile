@@ -12,75 +12,79 @@ import {
   TextInput,
   Dimensions,
 } from "react-native";
-import io from "socket.io-client";
-import Lightbox from "react-native-lightbox";
 import AntDesignIcon from "react-native-vector-icons/AntDesign";
 import MaterialCommunityIconsIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import IoniconsIcon from "react-native-vector-icons/Ionicons";
 import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
-import { ScrollView } from "react-native-web";
+import { Button, KeyboardAvoidingView, ScrollView } from "react-native-web";
 import conversationApi from "../api/ConversationApi";
 import TextMessage from "../components/message/TextMessage";
 import { format } from "date-fns";
 import ImageMessage from "../components/message/ImageMessage";
-const socket = io("ws://localhost:8081/");
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getSocket } from "../utils/SocketUtils";
+import EmojiPicker from "emoji-picker-react";
+// import { messagesData } from "./testData";
+// import ImagePicker from "react-native-image-crop-picker";
+// import ImagePicker from "react-native-image-picker";
+
+const userId = "660a2935d26d51861b4fc7fe"; // userID của người login vào, Kaito Hasei
 export default function ChatScreen({ route }) {
-  const { conversationId, conversationName, navigation } = route.params;
+  // const { conversationId, conversationName, navigation, userId } = route.params;
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const [messageImage, setMessageImage] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [messageSent, setMessageSent] = useState(true);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [image, setImage] = useState(null);
   const scrollViewRef = useRef(); // Create a ref for ScrollView
-  // 1. fecth tin nhắn sau khi có conversationId
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const storedAccessToken = await AsyncStorage.getItem("accessToken");
-        const data = await conversationApi.fetchMessagesByConversationId(
-          conversationId,
-          storedAccessToken
-        );
-        setMessages(data.message.reverse());
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  // 4. Handle sending text message
+  const handleSendTextMessage = async () => {
+    // try {
+    //   const storedAccessToken = await AsyncStorage.getItem("accessToken");
+    //   const result = await conversationApi.sendTextMessage(
+    //     conversationId,
+    //     messageText,
+    //     storedAccessToken
+    //   );
 
-    fetchMessages(); // Gọi hàm fetchMessages khi component được mount hoặc conversationId thay đổi
-  }, [conversationId]);
+    //   console.log("Message sent:", result);
+    //   setMessageText("");
+    //   // Emit the message to the server using socket
+    //   socket.emit("message", messageText);
 
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: false });
-    }
-  }, [messages]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const toggleModal = () => {
-    setModalVisible(!modalVisible);
+    //   // Clear the message input
+    // } catch (error) {
+    //   console.error("Error sending message:", error.message);
+    // }
+    console.log("");
   };
-  // useEffect(() => {
-  //   socket.emit("joinConversation", conversationId);
 
-  //   socket.on("message", (message) => {
-  //     setMessages((prevMessages) => [...prevMessages, message]);
-  //   });
-
-  //   return () => {
-  //     socket.emit("leaveConversation", conversationId);
-  //     socket.off("message");
-  //   };
-  // }, [conversationId]);
-
-  // const sendMessage = () => {
-  //   if (messageText.trim() !== "") {
-  //     socket.emit("sendMessage", { conversationId, content: messageText });
-  //     setMessageText("");
-  //   }
-  // };
+  const handleSendImageMessage = async () => {
+    // try {
+    //   const storedAccessToken = await AsyncStorage.getItem("accessToken");
+    //   console.log(messageImage.name);
+    //   // Gọi hàm sendImageMessage từ conversationApi
+    //   const result = await conversationApi.sendImageMessage(
+    //     conversationId,
+    //     [messageImage.name],
+    //     storedAccessToken
+    //   );
+    //   // Xóa nội dung của input sau khi đã gửi tin nhắn thành công
+    //   setMessageImage(null);
+    //   console.log("Image message sent:", result);
+    //   // Emit the message to the server using socket
+    //   socket.emit("message", messageImage);
+    //   // Clear the message input
+    // } catch (error) {
+    //   console.error("Error sending message:", error.message);
+    // }
+    console.log("");
+  };
   return (
-    <View
+    <KeyboardAvoidingView
       style={{
         width: "100%",
         display: "flex",
@@ -115,22 +119,11 @@ export default function ChatScreen({ route }) {
             <AntDesignIcon name="arrowleft" size={22} color="#fff" />
           </TouchableOpacity>
           <Text style={{ color: "white", fontSize: 18, fontWeight: "500" }}>
-            {conversationName}
+            {/* {conversationName} */}
+            IUH - Đại học CN
           </Text>
         </View>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 30,
-          }}
-        >
-          <IoniconsIcon name="call-outline" size={22} color="#fff" />
-          <IoniconsIcon name="videocam-outline" size={30} color="#fff" />
-          <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
-        </View>
+        <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
       </View>
       {/* Content */}
       <ScrollView
@@ -146,36 +139,34 @@ export default function ChatScreen({ route }) {
         showsVerticalScrollIndicator={true}
         inverted
       >
-        {messages.map((message) => {
-          console.log(message);
-          if (message.typeMessage === "TEXT") {
-            return (
-              <TextMessage
-                key={message.id} // Ensure each child component has a unique key
-                content={message.content}
-                createdAt={format(new Date(message.createdAt), "HH:mm")}
-                isUser={message.userId === "660a2935d26d51861b4fc7fe"}
-              />
-            );
-          } else if (message.typeMessage === "IMAGE") {
-            return (
-              <ImageMessage
-                key={message.id} // Ensure each child component has a unique key
-                content={{ uri: message.content.split(",").toString() }}
-                createdAt={format(new Date(message.createdAt), "HH:mm")}
-                isUser={message.userId === "660a2935d26d51861b4fc7fe"}
-              />
-            );
-          } else {
-            return null; // Return null for non-text messages
-          }
-        })}
-
-        {/* Tin nhắn dạng text */}
-
-        {/* Tin nhắn dạng hình ảnh */}
+        {messagesData.message
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .map((message) => {
+            if (message.typeMessage === "TEXT") {
+              return (
+                <TextMessage
+                  key={message.id}
+                  content={message.content}
+                  createdAt={format(new Date(message.createdAt), "HH:mm")}
+                  isUser={message.userId !== userId}
+                />
+              );
+            } else if (message.typeMessage === "IMAGE") {
+              return (
+                <ImageMessage
+                  key={message.id}
+                  content={{ uri: message.content.split(",").toString() }}
+                  createdAt={format(new Date(message.createdAt), "HH:mm")}
+                  isUser={message.userId !== userId}
+                />
+              );
+            } else {
+              return null; // Return null for non-text messages
+            }
+          })}
       </ScrollView>
-      {/* Chat input */}
+
+      {/* Form gửi tin nhắn */}
       <View
         style={{
           backgroundColor: "white",
@@ -193,11 +184,28 @@ export default function ChatScreen({ route }) {
           left: 0,
         }}
       >
-        <MaterialCommunityIconsIcon
-          name="sticker-emoji"
-          size={25}
-          color="828282"
-        />
+        {/* Sticker button */}
+        <TouchableOpacity
+          onPress={() => {
+            setShowEmojiPicker(!showEmojiPicker);
+          }}
+        >
+          <MaterialCommunityIconsIcon
+            name="sticker-emoji"
+            size={25}
+            color="828282"
+          />
+        </TouchableOpacity>
+        {/* Chứa sticker */}
+        {showEmojiPicker && (
+          <EmojiPicker
+            style={{ position: "absolute", bottom: 90, left: 15 }}
+            onEmojiClick={(emojiObject) => {
+              setMessageText(messageText + emojiObject.emoji);
+            }}
+          />
+        )}
+
         <TextInput
           style={{
             height: 40,
@@ -222,21 +230,39 @@ export default function ChatScreen({ route }) {
             alignItems: "center",
           }}
         >
-          <MaterialCommunityIconsIcon
-            name="dots-horizontal"
-            size={25}
-            color="828282"
-          />
-          <MaterialIconsIcon name="keyboard-voice" size={25} color="828282" />
-          <TouchableOpacity>
+          <MaterialIconsIcon name="attach-file" size={25} color="828282" />
+          <TouchableOpacity
+            onPress={() => document.getElementById("imageInput").click()}
+          >
             <MaterialCommunityIconsIcon
               name="file-image"
               size={25}
               color="828282"
             />
+            <input
+              type="file"
+              id="imageInput"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(event) => {
+                setMessageImage(event.target.files[0]);
+              }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              await handleSendTextMessage();
+              // await fetchMessages();
+            }}
+          >
+            <MaterialCommunityIconsIcon
+              name="send"
+              size={25}
+              color={messageImage || messageText !== "" ? "teal" : "828282"}
+            />
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

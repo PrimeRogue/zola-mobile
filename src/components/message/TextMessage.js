@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image } from "react-native";
-import Lightbox from "react-native-lightbox";
+
 const TextMessage = ({ content, createdAt, isUser }) => {
   return isUser ? (
     <View

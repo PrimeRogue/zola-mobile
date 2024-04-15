@@ -8,6 +8,6 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 export default function App() {
   // return <ConversationScreen></ConversationScreen>;
   // return <RegisterScreen></RegisterScreen>;
+  // return <AuthStackNavigator></AuthStackNavigator>;
   return <HomeStackNavigator></HomeStackNavigator>;
-  // return <ChatScreen></ChatScreen>;
 }

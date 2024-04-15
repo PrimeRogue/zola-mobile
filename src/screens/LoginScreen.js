@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  KeyboardAvoidingView,
-} from "react-native";
+import { View, Text, TextInput, KeyboardAvoidingView } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -14,6 +8,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import authAPI from "../api/AuthApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Validate Login Form
 const loginSchema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Please enter email"),
   password: yup.string().required("Password is required"),
@@ -23,31 +18,29 @@ const LoginScreen = ({ navigation }) => {
   const [loginError, setLogInError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Handle Login
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      const data = await authAPI.login(values);
-      const accessToken = data.access_token;
-      // Lưu access token vào AsyncStorage
-      await AsyncStorage.setItem("accessToken", accessToken);
-      // Xử lý dữ liệu đăng nhập ở đây
-      console.log("Login successful:", data);
-      navigation.navigate("HomeScreen");
+      const { access_token } = await authAPI.login(values);
+      await AsyncStorage.setItem("accessToken", access_token);
+      console.log("Login successful:", access_token);
+      navigation.navigate("ConversationScreen");
     } catch (error) {
-      const errorCode = error?.code; // Lấy mã lỗi từ đối tượng lỗi được ném ra
-      // Xử lý lỗi nếu có
-      if (errorCode === "wrong-password" || errorCode === "user-not-found") {
-        setLogInError("Invalid email or password");
-      } else if (errorCode === "email-not-verify") {
-        setLogInError("Email is not verified");
-      } else if (errorCode === "invalid-credential") {
-        setLogInError("Invalid credential");
-      } else {
-        // Xử lý các trường hợp lỗi khác
+      const errorCode = error?.code;
+      const errorMessages = {
+        "wrong-password": "Invalid email or password",
+        "user-not-found": "Invalid email or password",
+        "email-not-verify": "Email is not verified",
+        "invalid-credential": "Invalid credential",
+      };
+      setLogInError(errorMessages[errorCode] || "Unknown error");
+      if (!errorMessages[errorCode]) {
         console.error("Unknown error:", error);
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

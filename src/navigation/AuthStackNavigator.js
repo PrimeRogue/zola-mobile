@@ -4,13 +4,15 @@ import React from "react";
 import LoginScreen from "../screens/LoginScreen";
 import AuthScreen from "../screens/AuthScreen";
 import RegisterScreen from "../screens/RegisterScreen";
-import HomeScreen from "../screens/HomeScreen";
+import ConversationScreen from "../screens/ConversationScreen";
+import ChatScreen from "../screens/ChatScreen";
 const Stack = createStackNavigator();
 const screenComponents = {
   AuthScreen,
   LoginScreen,
   RegisterScreen,
-  HomeScreen,
+  ConversationScreen,
+  ChatScreen,
   //  ForgotPasswordScreen: quên mật khẩu
   //  ConfirmAccountScreen: xác nhận tài khoản
 };
