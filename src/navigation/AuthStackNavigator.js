@@ -11,8 +11,6 @@ const screenComponents = {
   AuthScreen,
   LoginScreen,
   RegisterScreen,
-  ConversationScreen,
-  ChatScreen,
   //  ForgotPasswordScreen: quên mật khẩu
   //  ConfirmAccountScreen: xác nhận tài khoản
 };

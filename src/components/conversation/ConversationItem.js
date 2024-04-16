@@ -19,7 +19,6 @@ const ConversationItem = ({ conversation, userId, navigation }) => {
         borderBottomWidth: 1,
         backgroundColor: "white",
       }}
-      key={index}
       onPress={() =>
         navigation.navigate("ChatScreen", {
           conversationId: conversation.id,
@@ -44,7 +43,8 @@ const ConversationItem = ({ conversation, userId, navigation }) => {
       />
       <View>
         <Text style={{ fontSize: 18, fontWeight: 500 }}>
-          {formatConversationName(conversation, userId)}
+          {formatConversationName(conversation, userId).substring(0, 15) +
+            "..."}
         </Text>
         <Text style={{ fontSize: 16, fontWeight: 500, color: "#848C8F" }}>
           {`${userId === conversation.latestMessage.userId ? "you: " : ""}${

@@ -24,8 +24,7 @@ const LoginScreen = ({ navigation }) => {
     try {
       const { access_token } = await authAPI.login(values);
       await AsyncStorage.setItem("accessToken", access_token);
-      console.log("Login successful:", access_token);
-      navigation.navigate("ConversationScreen");
+      navigation.navigate("BottomTabNavigator");
     } catch (error) {
       const errorCode = error?.code;
       const errorMessages = {

@@ -36,7 +36,7 @@ const TextMessage = ({ content, createdAt, isUser }) => {
       }}
     >
       <Image
-        source={require("https://source.unsplash.com/random")}
+        // source={require("https://source.unsplash.com/random")}
         style={{
           width: 50,
           height: 50,

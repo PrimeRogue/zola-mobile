@@ -39,6 +39,24 @@ const contactApi = {
       throw error;
     }
   },
+  getFriendRequest: async (access_token) => {
+    try {
+      const response = await fetch(`${API_URL}/get-friends-request`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed!");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default contactApi;

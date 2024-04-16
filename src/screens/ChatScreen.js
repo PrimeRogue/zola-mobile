@@ -25,13 +25,12 @@ import ImageMessage from "../components/message/ImageMessage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getSocket } from "../utils/SocketUtils";
 import EmojiPicker from "emoji-picker-react";
-// import { messagesData } from "./testData";
 // import ImagePicker from "react-native-image-crop-picker";
 // import ImagePicker from "react-native-image-picker";
 
 const userId = "660a2935d26d51861b4fc7fe"; // userID của người login vào, Kaito Hasei
 export default function ChatScreen({ route }) {
-  // const { conversationId, conversationName, navigation, userId } = route.params;
+  const { conversationId, conversationName, navigation, userId } = route.params;
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
   const [messageImage, setMessageImage] = useState(null);
@@ -40,6 +39,24 @@ export default function ChatScreen({ route }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [image, setImage] = useState(null);
   const scrollViewRef = useRef(); // Create a ref for ScrollView
+
+  // 1. fecth tin nhắn sau khi có conversationId
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const storedAccessToken = await AsyncStorage.getItem("accessToken");
+        const data = await conversationApi.fetchMessagesByConversationId(
+          conversationId,
+          storedAccessToken
+        );
+        setMessages(data.message.reverse());
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchMessages();
+  }, [conversationId]);
   // 4. Handle sending text message
   const handleSendTextMessage = async () => {
     // try {
@@ -119,8 +136,7 @@ export default function ChatScreen({ route }) {
             <AntDesignIcon name="arrowleft" size={22} color="#fff" />
           </TouchableOpacity>
           <Text style={{ color: "white", fontSize: 18, fontWeight: "500" }}>
-            {/* {conversationName} */}
-            IUH - Đại học CN
+            {conversationName.substring(0, 15) + "..."}
           </Text>
         </View>
         <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
@@ -139,7 +155,7 @@ export default function ChatScreen({ route }) {
         showsVerticalScrollIndicator={true}
         inverted
       >
-        {messagesData.message
+        {messages
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .map((message) => {
             if (message.typeMessage === "TEXT") {
@@ -170,7 +186,7 @@ export default function ChatScreen({ route }) {
       <View
         style={{
           backgroundColor: "white",
-          width: "100%",
+          width: "100vw",
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -182,6 +198,7 @@ export default function ChatScreen({ route }) {
           position: "absolute",
           bottom: 0,
           left: 0,
+          right: 0,
         }}
       >
         {/* Sticker button */}
@@ -199,7 +216,13 @@ export default function ChatScreen({ route }) {
         {/* Chứa sticker */}
         {showEmojiPicker && (
           <EmojiPicker
-            style={{ position: "absolute", bottom: 90, left: 15 }}
+            style={{
+              position: "absolute",
+              bottom: 90,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "90%",
+            }}
             onEmojiClick={(emojiObject) => {
               setMessageText(messageText + emojiObject.emoji);
             }}
@@ -210,10 +233,16 @@ export default function ChatScreen({ route }) {
           style={{
             height: 40,
             margin: 15,
+            marginLeft: 5,
+            marginRight: 5,
             backgroundColor: "transparent",
             color: "#8C8F91",
             flexGrow: 1,
             fontSize: 18,
+            borderColor: "#ccc",
+            borderWidth: 1,
+            borderRadius: 5,
+            paddingLeft: 5,
           }}
           placeholder="Tin nhan"
           value={messageText}
@@ -224,7 +253,7 @@ export default function ChatScreen({ route }) {
           style={{
             display: "flex",
             flexDirection: "row",
-            gap: 15,
+            gap: 10,
             flexGrow: 1,
             justifyContent: "space-between",
             alignItems: "center",

@@ -30,35 +30,37 @@ export default function ContactScreen({ route }) {
   const [cloneContactData, setCloneContactData] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [notification, setNotification] = useState({});
+  const navigation = useNavigation();
   // Tạo kênh thông báo
-
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
 
   // 1. Sau khi đăng nhập --> set Token
   // * Xoá code này: code này để test
-  useEffect(() => {
-    const fetchDataAndSetToken = async () => {
-      try {
-        const data = await authAPI.login({
-          email: "kaitohasei@gmail.com",
-          password: "LoL@123",
-        });
-        setAccessToken(data.access_token);
-        // Lưu access token vào AsyncStorage
-        await AsyncStorage.setItem("accessToken", data.access_token);
-      } catch (error) {
-        console.error("Lỗi khi lưu token vào AsyncStorage:", error);
-      }
-    };
-    fetchDataAndSetToken();
-  }, []);
+  // useEffect(() => {
+  //   const fetchDataAndSetToken = async () => {
+  //     try {
+  //       const data = await authAPI.login({
+  //         email: "kaitohasei@gmail.com",
+  //         password: "LoL@123",
+  //       });
+  //       setAccessToken(data.access_token);
+  //       // Lưu access token vào AsyncStorage
+  //       await AsyncStorage.setItem("accessToken", data.access_token);
+  //     } catch (error) {
+  //       console.error("Lỗi khi lưu token vào AsyncStorage:", error);
+  //     }
+  //   };
+  //   fetchDataAndSetToken();
+  // }, []);
 
-  // 2. Fetch danh sách conversation khi accessToken thay đổi
+  // 2. Fetch danh sách Contact đề xuất
   useEffect(() => {
     const getAllContact = async () => {
       try {
+        const accessToken = await AsyncStorage.getItem("accessToken");
+        console.log("get access token:", accessToken);
         const data = await contactApi.getAllContact(accessToken);
         setContactData(data);
         setCloneContactData(data);
@@ -73,6 +75,8 @@ export default function ContactScreen({ route }) {
   // 3. handle send friend request
   const handleSendFriendRequest = async (friendId) => {
     try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      console.log("get access token:", accessToken);
       const data = await contactApi.sendFriendRequest(accessToken, friendId);
       const { status } = data;
       const title =
@@ -176,6 +180,7 @@ export default function ContactScreen({ route }) {
           gap: 10,
           borderBottom: "1px solid #ccc",
         }}
+        onPress={() => navigation.navigate("FriendRequestScreen")}
       >
         <View
           style={{
