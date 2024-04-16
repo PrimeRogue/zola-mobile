@@ -82,6 +82,27 @@ const conversationApi = {
       throw error;
     }
   },
+  revokeMessage: async (conversationId, messageCuid, access_token) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/${conversationId}/messages/${messageCuid}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to revoke message");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default conversationApi;

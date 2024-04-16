@@ -8,6 +8,7 @@ import AuthScreen from "./src/screens/AuthScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
 import FriendRequestScreen from "./src/screens/FriendRequestScreen";
+import TooltipMessage from "./src/components/message/TooltipMessage";
 
 const Stack = createStackNavigator();
 const screenComponents = {
@@ -33,6 +34,7 @@ export default function App() {
         ))}
       </Stack.Navigator>
     </NavigationContainer>
+    // <TooltipMessage></TooltipMessage>
   );
 }
 
