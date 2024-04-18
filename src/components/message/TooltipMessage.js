@@ -5,14 +5,14 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import conversationApi from "../../api/ConversationApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native-gesture-handler";
+import { MaterialCommunityIconsIcon } from "../../utils/IconUtils";
 
-const TooltipMessage = ({ messageCuid, conversationId, content }) => {
+const TooltipMessage = ({ messageCuid, conversationId, content, isUser }) => {
   const [enableReply, setEnableReply] = useState(false);
   const [replyText, setReplyText] = useState("");
 
   const handleRevokeMessage = async () => {
     try {
-      console.log("clicked handle revoke");
       const accessToken = await AsyncStorage.getItem("accessToken");
       console.log(
         `http://localhost:8080/api/v1/conversations/${conversationId}/messages/${messageCuid}`
@@ -60,11 +60,18 @@ const TooltipMessage = ({ messageCuid, conversationId, content }) => {
           }}
         >
           <TouchableOpacity onPress={() => setEnableReply(!enableReply)}>
-            <EntypoIcon name="forward" size={18} color="teal" />
+            <EntypoIcon name="forward" size={22} color="teal" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleRevokeMessage}>
-            <Icon name="delete" size={18} color="teal" />
-          </TouchableOpacity>
+          {!isUser && (
+            <TouchableOpacity onPress={handleRevokeMessage}>
+              <MaterialCommunityIconsIcon
+                name="delete"
+                size={22}
+                color="teal"
+              />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity>
             <Icon name="smileo" size={18} color="#ccc" />
           </TouchableOpacity>

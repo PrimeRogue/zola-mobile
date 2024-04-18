@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/AntDesign";
 import ConversationScreen from "../screens/ConversationScreen";
 import ContactScreen from "../screens/ContactScreen";
+import PersonalScreen from "../screens/PersonalScreen";
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = ({ route }) => {
@@ -45,7 +46,7 @@ const BottomTabNavigator = ({ route }) => {
       />
       <Tab.Screen
         name="Cá nhân"
-        component={ContactScreen}
+        component={PersonalScreen}
         options={{ headerShown: false }}
       />
     </Tab.Navigator>

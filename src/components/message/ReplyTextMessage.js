@@ -10,7 +10,7 @@ const ReplyTextMessage = ({
   conversationId,
 }) => {
   const [contentReply, textReply] = content.uri.toString().split("type:REPLY");
-  console.log(content);
+  const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   return !isUser ? (
     <View
       style={{
@@ -18,7 +18,7 @@ const ReplyTextMessage = ({
         flexDirection: "column",
       }}
     >
-      <View
+      <TouchableOpacity
         style={{
           borderRadius: 10,
           borderWidth: 1,
@@ -34,6 +34,9 @@ const ReplyTextMessage = ({
           maxWidth: "60%",
           alignSelf: "flex-end",
         }}
+        onPress={() => {
+          setIsVisibleTooltip(!isVisibleTooltip);
+        }}
       >
         <View
           style={{
@@ -44,13 +47,21 @@ const ReplyTextMessage = ({
           }}
         >
           <View
-            style={{ height: 50, width: 2, backgroundColor: "teal" }}
+            style={{ height: 40, width: 2, backgroundColor: "teal" }}
           ></View>
           <Text style={{ fontSize: 16, color: "#ccc" }}>{contentReply}</Text>
         </View>
         <Text style={{ fontSize: 18, color: "black" }}>{textReply}</Text>
         <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
-      </View>
+      </TouchableOpacity>
+      {isVisibleTooltip && (
+        <TooltipMessage
+          messageCuid={messageCuid}
+          conversationId={conversationId}
+          content={content.uri.toString()}
+          isUser={isUser}
+        ></TooltipMessage>
+      )}
     </View>
   ) : (
     <View

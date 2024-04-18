@@ -9,7 +9,7 @@ const TextMessage = ({
   messageCuid,
   conversationId,
 }) => {
-  const [isVisibleTooltip, setIsVisibleTooltip] = useState(true);
+  const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   return !isUser ? (
     <View
       style={{
@@ -72,22 +72,36 @@ const TextMessage = ({
           borderColor: "#ccc",
         }}
       />
-      <View
-        style={{
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: "#ccc",
-          padding: 10,
-          backgroundColor: "white",
-          display: "flex",
-          flexDirection: "column",
-          gap: 5,
-          width: "fit-content",
-          alignSelf: "flex-start",
-        }}
-      >
-        <Text style={{ fontSize: 18, color: "black" }}>{content}</Text>
-        <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
+
+      <View style={{ display: "flex", direction: "column", gap: 10 }}>
+        <TouchableOpacity
+          style={{
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: "#ccc",
+            padding: 10,
+            backgroundColor: "white",
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+            width: "fit-content",
+            alignSelf: "flex-start",
+          }}
+          onPress={() => {
+            setIsVisibleTooltip(!isVisibleTooltip);
+          }}
+        >
+          <Text style={{ fontSize: 18, color: "black" }}>{content}</Text>
+          <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
+        </TouchableOpacity>
+        {isVisibleTooltip && (
+          <TooltipMessage
+            messageCuid={messageCuid}
+            conversationId={conversationId}
+            content={content}
+            isUser={isUser}
+          ></TooltipMessage>
+        )}
       </View>
     </View>
   );

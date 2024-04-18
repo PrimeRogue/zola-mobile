@@ -33,11 +33,18 @@ import * as ImagePicker from "expo-image-picker";
 import base64toFile from "../utils/FileUtils";
 import ReplyTextMessage from "../components/message/ReplyTextMessage";
 export default function ChatScreen({ route }) {
-  const { conversationId, conversationName, navigation, userId } = route.params;
+  const {
+    conversationId,
+    conversationName,
+    navigation,
+    userId,
+    setIsMessagesChanged,
+  } = route.params;
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
   const [messageType, setMessageType] = useState("TEXT");
   const [selectedImages, setSelectedImages] = useState([]);
+  const [dataReceived, setDataReceived] = useState({});
   const [socket, setSocket] = useState({
     rootSocket: null,
     chatSocket: null,
@@ -157,10 +164,12 @@ export default function ChatScreen({ route }) {
     if (socket.chatSocket) {
       const handleSentMessage = (data) => {
         console.log("Message sent event received:", data);
+        setDataReceived(data);
         fetchMessages();
         setMessageText("");
         setSelectedImages([]);
         setShowEmojiPicker(false);
+        setIsMessagesChanged(true);
       };
       const handleRevokeMessage = (data) => {
         fetchMessages();
@@ -229,7 +238,9 @@ export default function ChatScreen({ route }) {
             <AntDesignIcon name="arrowleft" size={22} color="#fff" />
           </TouchableOpacity>
           <Text style={{ color: "white", fontSize: 18, fontWeight: "500" }}>
-            {conversationName.substring(0, 15) + "..."}
+            {conversationName.length > 27
+              ? `${conversationName.substring(0, 27)}...`
+              : conversationName}
           </Text>
         </View>
         <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
@@ -259,6 +270,8 @@ export default function ChatScreen({ route }) {
                   content={{ uri: message.content.split(",").toString() }}
                   createdAt={format(new Date(message.createdAt), "HH:mm")}
                   isUser={message.userId !== userId}
+                  conversationId={conversationId}
+                  messageCuid={message.cuid}
                 ></ReplyTextMessage>
               );
             } else if (message.typeMessage === "TEXT") {
@@ -279,6 +292,8 @@ export default function ChatScreen({ route }) {
                   content={{ uri: message.content.split(",").toString() }}
                   createdAt={format(new Date(message.createdAt), "HH:mm")}
                   isUser={message.userId !== userId}
+                  conversationId={conversationId}
+                  messageCuid={message.cuid}
                 />
               );
             } else {

@@ -27,8 +27,9 @@ import contactApi from "../api/ContactApi";
 import authAPI from "../api/AuthApi";
 import { sendNotification } from "../utils/PushNotificationUtils";
 import Notification from "../components/notification/Notification";
+import conversationApi from "../api/ConversationApi";
+import userApi from "../api/UserApi";
 
-const userId = "660a2935d26d51861b4fc7fe"; // userID của người login vào, Kaito Hasei
 export default function ContactScreen({ route }) {
   const [accessToken, setAccessToken] = useState("");
   const [contactData, setContactData] = useState([]);
@@ -36,39 +37,22 @@ export default function ContactScreen({ route }) {
   const [cloneContactData, setCloneContactData] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [notification, setNotification] = useState({});
+  const [userId, setUserId] = useState("");
   const navigation = useNavigation();
   // Tạo kênh thông báo
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
 
-  // 1. Sau khi đăng nhập --> set Token
-  // * Xoá code này: code này để test
-  useEffect(() => {
-    const fetchDataAndSetToken = async () => {
-      try {
-        const data = await authAPI.login({
-          email: "linh1@livegency.com",
-          password: "123456",
-        });
-        setAccessToken(data.access_token);
-        // Lưu access token vào AsyncStorage
-        await AsyncStorage.setItem("accessToken", data.access_token);
-      } catch (error) {
-        console.error("Lỗi khi lưu token vào AsyncStorage:", error);
-      }
-    };
-    fetchDataAndSetToken();
-  }, []);
-
   // 2. Fetch danh sách Contact đề xuất
   useEffect(() => {
     const getAllContactAndFriend = async () => {
       try {
         const accessToken = await AsyncStorage.getItem("accessToken");
-        console.log("get access token:", accessToken);
         const contactData = await contactApi.getAllContact(accessToken);
         const allFriendData = await contactApi.getAllFriend(accessToken);
+        const me = await userApi.getMe(accessToken);
+        setUserId(me.id);
         setContactData(contactData);
         setCloneContactData(contactData);
         setAllFriendData(allFriendData);
@@ -108,6 +92,28 @@ export default function ContactScreen({ route }) {
         message: "Failed to send friend request.",
       });
     }
+  };
+
+  // 4. Redirect chat user
+  const handleRedirectChat = async (friendId) => {
+    // fecth conversations
+    const accessToken = await AsyncStorage.getItem("accessToken");
+    const conversations = await conversationApi.fetchConversation(accessToken);
+    const filteredItems = conversations.list.filter(
+      (item) => !item.isGroup && item.participants[1].id === friendId
+    );
+    navigation.navigate("ChatScreen", {
+      conversationId: filteredItems[0].id,
+      conversationName:
+        filteredItems[0].participants[1].displayName.length > 27
+          ? `${filteredItems[0].participants[1].displayName.substring(
+              0,
+              27
+            )}...`
+          : filteredItems[0].participants[1].displayName,
+      userId: userId,
+      navigation: navigation,
+    });
   };
 
   return (
@@ -236,15 +242,15 @@ export default function ContactScreen({ route }) {
           <View
             key={index}
             style={{
+              width: "100%",
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
-              borderWidth: 1,
-              borderColor: "#ccc",
+              borderBottomWidth: 1,
+              borderBottomColor: "#ccc",
               borderRadius: 5,
               padding: 10,
-              marginBottom: 10,
             }}
           >
             <View
@@ -288,20 +294,44 @@ export default function ContactScreen({ route }) {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity
+
+            <View
               style={{
                 display: "flex",
+                flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "teal",
-                width: 50,
-                height: 40,
-                borderRadius: 5,
+                gap: 5,
               }}
-              onPress={() => handleSendFriendRequest(item.id)}
             >
-              <AntDesignIcon name="adduser" size={18} color="#fff" />
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "teal",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 5,
+                }}
+                onPress={() => handleRedirectChat(item.friendId)}
+              >
+                <AntDesignIcon name="message1" size={18} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "teal",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 5,
+                }}
+                // onPress={() => handleSendFriendRequest(item.id)}
+              >
+                <AntDesignIcon name="deleteuser" size={18} color="#fff" />
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
       </View>
@@ -410,6 +440,78 @@ export default function ContactScreen({ route }) {
                 gap: 10,
               }}
             >
+              {contactData.map((item, index) => (
+                <View
+                  key={index}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 5,
+                    padding: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      // source={{item.photo}}}
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        resizeMode: "cover",
+                        backgroundColor: "white",
+                        borderWidth: 1,
+                        borderColor: "#ccc",
+                      }}
+                    />
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 5,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          wordWrap: "break-word",
+                        }}
+                      >
+                        {item.displayName.substring(0, 15) + "..."}
+                      </Text>
+                      <Text style={{ fontSize: 14, color: "#ccc" }}>
+                        {item.email.substring(0, 20)}
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "teal",
+                      width: 50,
+                      height: 40,
+                      borderRadius: 5,
+                    }}
+                    onPress={() => handleSendFriendRequest(item.id)}
+                  >
+                    <AntDesignIcon name="adduser" size={18} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
               {contactData.map((item, index) => (
                 <View
                   key={index}

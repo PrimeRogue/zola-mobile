@@ -9,11 +9,15 @@ import authAPI from "../api/AuthApi";
 import conversationApi from "../api/ConversationApi";
 import ConversationItem from "../components/conversation/ConversationItem";
 import userApi from "../api/UserApi";
-export default function ConversationScreen() {
+import { ScrollView } from "react-native-gesture-handler";
+export default function ConversationScreen({ route }) {
+  const [isMessagesChanged, setIsMessagesChanged] = useState(false);
+  const [isCreateGroup, setIsCreateGroup] = useState(false);
   const [conversationData, setConversationData] = useState([]);
   const navigation = useNavigation();
   const [accessToken, setAccessToken] = useState("");
   const [userId, setUserId] = useState("");
+
   // 1. Sau khi đăng nhập --> set Token
   // * Xoá code này: code này để test
   // useEffect(() => {
@@ -33,25 +37,32 @@ export default function ConversationScreen() {
   //   fetchDataAndSetToken();
   // }, []);
   // 2. Fetch danh sách conversation khi accessToken thay đổi
-  useEffect(() => {
-    const fetchConversationList = async () => {
-      try {
-        const accessToken = await AsyncStorage.getItem("accessToken");
-        console.log("get access token:", accessToken);
-        const conversations = await conversationApi.fetchConversation(
-          accessToken
-        );
-        const me = await userApi.getMe(accessToken);
-        setUserId(me.id);
-        setConversationData(conversations.list);
-      } catch (error) {
-        console.error(error.message + "--" + error.code);
-      }
-    };
+  const fetchConversationList = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      console.log("get access token:", accessToken);
+      const conversations = await conversationApi.fetchConversation(
+        accessToken
+      );
+      const me = await userApi.getMe(accessToken);
+      setUserId(me.id);
+      setConversationData(conversations.list);
+    } catch (error) {
+      console.error(error.message + "--" + error.code);
+    }
+  };
 
+  useEffect(() => {
     fetchConversationList();
   }, [accessToken]);
-
+  useEffect(() => {
+    fetchConversationList();
+    setIsMessagesChanged(false);
+  }, [isMessagesChanged]);
+  useEffect(() => {
+    fetchConversationList();
+    setIsCreateGroup(false);
+  }, [isCreateGroup]);
   return (
     <View
       style={{
@@ -59,6 +70,7 @@ export default function ConversationScreen() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        marginBottom: 70,
       }}
     >
       {/*Header  */}
@@ -94,33 +106,46 @@ export default function ConversationScreen() {
             gap: 30,
           }}
           onPress={() =>
-            navigation.navigate("CreateGroupScreen", { navigation })
+            navigation.navigate("CreateGroupScreen", {
+              navigation,
+              setIsCreateGroup,
+            })
           }
         >
           <AntDesignIcon name="addusergroup" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
-      {conversationData.length !== 0 && userId !== "" ? (
-        conversationData.map((conversation, index) => (
-          <ConversationItem
-            key={index}
-            conversation={conversation}
-            userId={userId}
-            navigation={navigation}
-          ></ConversationItem>
-        ))
-      ) : (
-        <Text
-          style={{
-            textAlign: "center",
-            padding: 10,
-            paddingTop: 15,
-            fontSize: 16,
-          }}
-        >
-          Chưa có cuộc trò chuyện nào
-        </Text>
-      )}
+      <ScrollView
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          width: "100%",
+        }}
+      >
+        {conversationData.length !== 0 && userId !== "" ? (
+          conversationData.map((conversation, index) => (
+            <ConversationItem
+              key={index}
+              conversation={conversation}
+              userId={userId}
+              navigation={navigation}
+              setIsMessagesChanged={setIsMessagesChanged}
+            ></ConversationItem>
+          ))
+        ) : (
+          <Text
+            style={{
+              textAlign: "center",
+              padding: 10,
+              paddingTop: 15,
+              fontSize: 16,
+            }}
+          >
+            Chưa có cuộc trò chuyện nào
+          </Text>
+        )}
+      </ScrollView>
     </View>
   );
 }

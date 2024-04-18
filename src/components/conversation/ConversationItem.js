@@ -6,7 +6,12 @@ import {
 import { formatDistance } from "date-fns";
 import { Image, TouchableOpacity, View, Text } from "react-native";
 
-const ConversationItem = ({ conversation, userId, navigation }) => {
+const ConversationItem = ({
+  conversation,
+  userId,
+  navigation,
+  setIsMessagesChanged,
+}) => {
   const extractTypeReply = (s) => {
     const index = s.indexOf("type:REPLY");
     if (index !== -1) {
@@ -29,9 +34,14 @@ const ConversationItem = ({ conversation, userId, navigation }) => {
       onPress={() =>
         navigation.navigate("ChatScreen", {
           conversationId: conversation.id,
-          conversationName: formatConversationName(conversation, userId),
+          conversationName: conversation?.isGroup
+            ? conversation.groupName.length > 27
+              ? `${conversation.groupName.substring(0, 27)}...`
+              : conversation.groupName
+            : formatConversationName(conversation, userId).substring(0, 27),
           navigation: navigation,
           userId: userId,
+          setIsMessagesChanged: setIsMessagesChanged,
         })
       }
     >
@@ -51,7 +61,9 @@ const ConversationItem = ({ conversation, userId, navigation }) => {
       <View>
         <Text style={{ fontSize: 18, fontWeight: 500 }}>
           {conversation?.isGroup
-            ? conversation.groupName.substring(0, 15) + "..."
+            ? conversation.groupName.length > 15
+              ? `${conversation.groupName.substring(0, 15)}...`
+              : conversation.groupName
             : formatConversationName(conversation, userId).substring(0, 15) +
               "..."}
         </Text>

@@ -39,7 +39,7 @@ export default function CreateGroupScreen({ route }) {
   const [selectedImage, setSelectedImage] = useState();
   const [allFriendData, setAllFriendData] = useState([]);
   const [cloneAllFriendData, setCloneAllFriendData] = useState([]);
-  const { navigation } = route.params;
+  const { navigation, setIsCreateGroup } = route.params;
   const [accessToken, setAccessToken] = useState("");
   const [checkedValues, setCheckedValues] = useState(
     Array(allFriendData.length).fill(false)
@@ -94,13 +94,15 @@ export default function CreateGroupScreen({ route }) {
       if (
         checkedValues.filter((item) => item === true).length > 1 &&
         groupName.trim() !== ""
-      )
-        console.log(participantIds);
-      // const data = await conversationApi.createConversation(
-      //   participantIds,
-      //   groupName,
-      //   accessToken
-      // );
+      ) {
+        const data = await conversationApi.createConversation(
+          participantIds,
+          groupName,
+          accessToken
+        );
+        setIsCreateGroup(true);
+        navigation.goBack();
+      }
     } catch (error) {
       console.error(error.message + "--" + error.code);
     }
