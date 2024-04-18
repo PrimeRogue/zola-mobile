@@ -3,7 +3,7 @@ import { useState } from "react";
 import { View, Text, Image, Dimensions } from "react-native";
 import Lightbox from "react-native-lightbox";
 const ImageMessage = ({ content, createdAt, isUser }) => {
-  return isUser ? (
+  return !isUser ? (
     <View
       style={{
         borderRadius: 10,
@@ -80,13 +80,10 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
             style={{
               maxWidth: "100%",
               width: "100%",
-              width: 250,
               height: 250,
+              maxHeight: "100%",
               borderRadius: 10,
-              resizeMode: "cover",
-              backgroundColor: "white",
-              borderWidth: 1,
-              borderColor: "#ccc",
+              resizeMode: "contain",
             }}
           />
         </Lightbox>

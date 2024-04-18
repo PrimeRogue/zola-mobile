@@ -78,7 +78,7 @@ const LoginScreen = ({ navigation }) => {
         }}
       >
         <Text style={{ fontSize: 16 }}>
-          Please enter email and password to log in
+          Nhập email và password để đăng nhập
         </Text>
       </View>
       <Spinner visible={loading} />
@@ -100,11 +100,15 @@ const LoginScreen = ({ navigation }) => {
             <TextInput
               style={{
                 height: 40,
-                borderBottomColor: "#ccc",
-                borderBottomWidth: 1,
                 margin: 15,
                 backgroundColor: "transparent",
                 color: "#8C8F91",
+                flexGrow: 1,
+                fontSize: 18,
+                borderColor: "#ccc",
+                borderWidth: 1,
+                borderRadius: 5,
+                paddingLeft: 5,
               }}
               onChangeText={handleChange("email")}
               onBlur={handleBlur("email")}
@@ -117,12 +121,16 @@ const LoginScreen = ({ navigation }) => {
             <TextInput
               style={{
                 height: 40,
-                borderBottomColor: "#ccc",
-                borderBottomWidth: 1,
                 margin: 15,
                 marginTop: 0,
                 backgroundColor: "transparent",
                 color: "#8C8F91",
+                flexGrow: 1,
+                fontSize: 18,
+                borderColor: "#ccc",
+                borderWidth: 1,
+                borderRadius: 5,
+                paddingLeft: 5,
               }}
               onChangeText={handleChange("password")}
               onBlur={handleBlur("password")}

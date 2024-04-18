@@ -23,5 +23,5 @@ export const getConversationAvatar = (conversation, userId) => {
     return participants?.[0]?.photoUrl;
   }
 
-  return "";
+  return;
 };

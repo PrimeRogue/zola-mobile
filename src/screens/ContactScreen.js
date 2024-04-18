@@ -12,9 +12,14 @@ import {
   Dimensions,
   Modal,
 } from "react-native";
-import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
-import AntDesignIcon from "react-native-vector-icons/AntDesign";
-import IoniconsIcon from "react-native-vector-icons/Ionicons";
+import {
+  AntDesignIcon,
+  MaterialCommunityIconsIcon,
+  IoniconsIcon,
+  MaterialIconsIcon,
+  FontAwesome5Icon,
+} from "../utils/IconUtils";
+
 import { useNavigation } from "@react-navigation/native";
 import { Button, KeyboardAvoidingView, ScrollView } from "react-native-web";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,6 +32,7 @@ const userId = "660a2935d26d51861b4fc7fe"; // userID của người login vào, 
 export default function ContactScreen({ route }) {
   const [accessToken, setAccessToken] = useState("");
   const [contactData, setContactData] = useState([]);
+  const [allFriendData, setAllFriendData] = useState([]);
   const [cloneContactData, setCloneContactData] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [notification, setNotification] = useState({});
@@ -57,19 +63,21 @@ export default function ContactScreen({ route }) {
 
   // 2. Fetch danh sách Contact đề xuất
   useEffect(() => {
-    const getAllContact = async () => {
+    const getAllContactAndFriend = async () => {
       try {
         const accessToken = await AsyncStorage.getItem("accessToken");
         console.log("get access token:", accessToken);
-        const data = await contactApi.getAllContact(accessToken);
-        setContactData(data);
-        setCloneContactData(data);
+        const contactData = await contactApi.getAllContact(accessToken);
+        const allFriendData = await contactApi.getAllFriend(accessToken);
+        setContactData(contactData);
+        setCloneContactData(contactData);
+        setAllFriendData(allFriendData);
       } catch (error) {
         console.error(error.code);
       }
     };
 
-    getAllContact();
+    getAllContactAndFriend();
   }, [accessToken]);
 
   // 3. handle send friend request
@@ -219,9 +227,83 @@ export default function ContactScreen({ route }) {
         >
           Danh sách bạn bè
         </Text>
-        <Text style={{ fontSize: 16, marginTop: 15, marginBottom: 15 }}>
-          Chưa có bạn bè
-        </Text>
+        {allFriendData.length === 0 && (
+          <Text style={{ fontSize: 16, marginTop: 15, marginBottom: 15 }}>
+            Chưa có bạn bè
+          </Text>
+        )}
+        {allFriendData.map((item, index) => (
+          <View
+            key={index}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderWidth: 1,
+              borderColor: "#ccc",
+              borderRadius: 5,
+              padding: 10,
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 10,
+                alignItems: "center",
+              }}
+            >
+              <Image
+                source={{ uri: item.friend.photoUrl }}
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: "50%",
+                  resizeMode: "cover",
+                  backgroundColor: "white",
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                }}
+              />
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  {item.friend.displayName.substring(0, 15) + "..."}
+                </Text>
+                <Text style={{ fontSize: 14, color: "#ccc" }}>
+                  {item.friend.email.substring(0, 20)}
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "teal",
+                width: 50,
+                height: 40,
+                borderRadius: 5,
+              }}
+              onPress={() => handleSendFriendRequest(item.id)}
+            >
+              <AntDesignIcon name="adduser" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        ))}
       </View>
       {/* Modal khi bấm vào gợi ý kết bạn  */}
       <Modal

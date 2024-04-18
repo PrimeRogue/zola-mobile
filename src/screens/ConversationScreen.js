@@ -8,30 +8,30 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import authAPI from "../api/AuthApi";
 import conversationApi from "../api/ConversationApi";
 import ConversationItem from "../components/conversation/ConversationItem";
-const userId = "660a2935d26d51861b4fc7fe"; // userID của người login vào, Kaito Hasei
+import userApi from "../api/UserApi";
 export default function ConversationScreen() {
   const [conversationData, setConversationData] = useState([]);
   const navigation = useNavigation();
   const [accessToken, setAccessToken] = useState("");
+  const [userId, setUserId] = useState("");
   // 1. Sau khi đăng nhập --> set Token
   // * Xoá code này: code này để test
-  useEffect(() => {
-    const fetchDataAndSetToken = async () => {
-      try {
-        const data = await authAPI.login({
-          email: "linh1@livegency.com",
-          password: "123456",
-        });
-        setAccessToken(data.access_token);
-        // Lưu access token vào AsyncStorage
-        await AsyncStorage.setItem("accessToken", data.access_token);
-      } catch (error) {
-        console.error("Lỗi khi lưu token vào AsyncStorage:", error);
-      }
-    };
-    fetchDataAndSetToken();
-  }, []);
-
+  // useEffect(() => {
+  //   const fetchDataAndSetToken = async () => {
+  //     try {
+  //       const data = await authAPI.login({
+  //         email: "linh1@livegency.com",
+  //         password: "123456",
+  //       });
+  //       setAccessToken(data.access_token);
+  //       // Lưu access token vào AsyncStorage
+  //       await AsyncStorage.setItem("accessToken", data.access_token);
+  //     } catch (error) {
+  //       console.error("Lỗi khi lưu token vào AsyncStorage:", error);
+  //     }
+  //   };
+  //   fetchDataAndSetToken();
+  // }, []);
   // 2. Fetch danh sách conversation khi accessToken thay đổi
   useEffect(() => {
     const fetchConversationList = async () => {
@@ -41,10 +41,11 @@ export default function ConversationScreen() {
         const conversations = await conversationApi.fetchConversation(
           accessToken
         );
-
+        const me = await userApi.getMe(accessToken);
+        setUserId(me.id);
         setConversationData(conversations.list);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách cuộc trò chuyện:", error.code);
+        console.error(error.message + "--" + error.code);
       }
     };
 
@@ -84,7 +85,7 @@ export default function ConversationScreen() {
           <AntDesignIcon name="search1" size={18} color="#fff" />
           <Text style={{ color: "#eee", fontSize: 18 }}>Search</Text>
         </View>
-        <View
+        <TouchableOpacity
           style={{
             display: "flex",
             flexDirection: "row",
@@ -92,11 +93,14 @@ export default function ConversationScreen() {
             alignItems: "center",
             gap: 30,
           }}
+          onPress={() =>
+            navigation.navigate("CreateGroupScreen", { navigation })
+          }
         >
-          <AntDesignIcon name="plus" size={18} color="#fff" />
-        </View>
+          <AntDesignIcon name="addusergroup" size={18} color="#fff" />
+        </TouchableOpacity>
       </View>
-      {conversationData.length !== 0 ? (
+      {conversationData.length !== 0 && userId !== "" ? (
         conversationData.map((conversation, index) => (
           <ConversationItem
             key={index}

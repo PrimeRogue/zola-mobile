@@ -2,14 +2,15 @@ import React, { useRef, useState } from "react";
 import { View, Text, Image } from "react-native";
 import TooltipMessage from "./TooltipMessage";
 import { TouchableOpacity } from "react-native-gesture-handler";
-const TextMessage = ({
+const ReplyTextMessage = ({
   content,
   createdAt,
   isUser,
   messageCuid,
   conversationId,
 }) => {
-  const [isVisibleTooltip, setIsVisibleTooltip] = useState(true);
+  const [contentReply, textReply] = content.uri.toString().split("type:REPLY");
+  console.log(content);
   return !isUser ? (
     <View
       style={{
@@ -17,7 +18,7 @@ const TextMessage = ({
         flexDirection: "column",
       }}
     >
-      <TouchableOpacity
+      <View
         style={{
           borderRadius: 10,
           borderWidth: 1,
@@ -33,20 +34,23 @@ const TextMessage = ({
           maxWidth: "60%",
           alignSelf: "flex-end",
         }}
-        onPress={() => {
-          setIsVisibleTooltip(!isVisibleTooltip);
-        }}
       >
-        <Text style={{ fontSize: 18, color: "black" }}>{content}</Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 10,
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{ height: 50, width: 2, backgroundColor: "teal" }}
+          ></View>
+          <Text style={{ fontSize: 16, color: "#ccc" }}>{contentReply}</Text>
+        </View>
+        <Text style={{ fontSize: 18, color: "black" }}>{textReply}</Text>
         <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
-      </TouchableOpacity>
-      {isVisibleTooltip && (
-        <TooltipMessage
-          messageCuid={messageCuid}
-          conversationId={conversationId}
-          content={content}
-        ></TooltipMessage>
-      )}
+      </View>
     </View>
   ) : (
     <View
@@ -93,4 +97,4 @@ const TextMessage = ({
   );
 };
 
-export default TextMessage;
+export default ReplyTextMessage;

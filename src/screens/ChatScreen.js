@@ -12,10 +12,14 @@ import {
   TextInput,
   Dimensions,
 } from "react-native";
-import AntDesignIcon from "react-native-vector-icons/AntDesign";
-import MaterialCommunityIconsIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import IoniconsIcon from "react-native-vector-icons/Ionicons";
-import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
+import {
+  AntDesignIcon,
+  MaterialCommunityIconsIcon,
+  IoniconsIcon,
+  MaterialIconsIcon,
+  OcticonsIcon,
+} from "../utils/IconUtils";
+
 import { useNavigation } from "@react-navigation/native";
 import { Button, KeyboardAvoidingView, ScrollView } from "react-native-web";
 import conversationApi from "../api/ConversationApi";
@@ -25,13 +29,15 @@ import ImageMessage from "../components/message/ImageMessage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getSocket } from "../utils/SocketUtils";
 import EmojiPicker from "emoji-picker-react";
-
-const userId = "660a2935d26d51861b4fc7fe"; // userID của người login vào, Kaito Hasei
+import * as ImagePicker from "expo-image-picker";
+import base64toFile from "../utils/FileUtils";
+import ReplyTextMessage from "../components/message/ReplyTextMessage";
 export default function ChatScreen({ route }) {
   const { conversationId, conversationName, navigation, userId } = route.params;
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
-  const [messageImage, setMessageImage] = useState(null);
+  const [messageType, setMessageType] = useState("TEXT");
+  const [selectedImages, setSelectedImages] = useState([]);
   const [socket, setSocket] = useState({
     rootSocket: null,
     chatSocket: null,
@@ -95,34 +101,55 @@ export default function ChatScreen({ route }) {
         messageText,
         storedAccessToken
       );
-
-      console.log("Message sent:", data);
-      setMessageText("");
     } catch (error) {
-      console.error("Error sending message:", error.message);
+      console.error(error.message + "--" + error.code);
     }
+    console.log("message type are TEXT");
   };
 
   const handleSendImageMessage = async () => {
-    // try {
-    //   const storedAccessToken = await AsyncStorage.getItem("accessToken");
-    //   console.log(messageImage.name);
-    //   // Gọi hàm sendImageMessage từ conversationApi
-    //   const result = await conversationApi.sendImageMessage(
-    //     conversationId,
-    //     [messageImage.name],
-    //     storedAccessToken
-    //   );
-    //   // Xóa nội dung của input sau khi đã gửi tin nhắn thành công
-    //   setMessageImage(null);
-    //   console.log("Image message sent:", result);
-    //   // Emit the message to the server using socket
-    //   socket.emit("message", messageImage);
-    //   // Clear the message input
-    // } catch (error) {
-    //   console.error("Error sending message:", error.message);
-    // }
-    console.log("");
+    console.log("message type are IMAGE");
+    try {
+      const files = [];
+      for (let i = 0; i < selectedImages.length; i++) {
+        if (/^data:image\/jpeg;base64,/.test(selectedImages[i])) {
+          // Nếu dữ liệu base64 bắt đầu bằng 'data:image/jpeg;base64,', loại bỏ phần tiêu đề
+          const base64Data = selectedImages[i].replace(
+            /^data:image\/jpeg;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "image.jpg");
+          files.push(file);
+        } else if (/^data:image\/png;base64,/.test(selectedImages[i])) {
+          // Nếu dữ liệu base64 bắt đầu bằng 'data:image/png;base64,', loại bỏ phần tiêu đề
+          const base64Data = selectedImages[i].replace(
+            /^data:image\/png;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "image.png");
+          files.push(file);
+        } else {
+          console.error("Invalid base64 format:", selectedImages[i]);
+        }
+      }
+
+      console.log("Files converted:", files);
+
+      const storedAccessToken = await AsyncStorage.getItem("accessToken");
+      files.forEach(async (item) => {
+        const formData = new FormData();
+        formData.append("images", item);
+        const result = await conversationApi.sendImageMessage(
+          conversationId,
+          formData,
+          storedAccessToken
+        );
+      });
+    } catch (error) {
+      console.error(error.message + "--" + error.code);
+    }
+
+    setMessageType("TEXT");
   };
 
   // 5. Xử lý các event socket
@@ -131,15 +158,41 @@ export default function ChatScreen({ route }) {
       const handleSentMessage = (data) => {
         console.log("Message sent event received:", data);
         fetchMessages();
+        setMessageText("");
+        setSelectedImages([]);
+        setShowEmojiPicker(false);
       };
-
+      const handleRevokeMessage = (data) => {
+        fetchMessages();
+      };
       socket.chatSocket.on("sent_message", handleSentMessage);
-
+      socket.chatSocket.on("revoke_message", handleRevokeMessage);
       return () => {
         socket.chatSocket.off("sent_message", handleSentMessage);
       };
     }
   }, [socket.chatSocket, fetchMessages]);
+
+  // 6. Handle Pick Images
+  const handlePickImages = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+    setSelectedImages(result.assets.map((asset) => asset.uri));
+    setMessageType("IMAGE");
+  };
+
+  // 7. Handle Remove Image
+  const handleRemoveImage = (index) => {
+    const newImages = [...selectedImages];
+    newImages.splice(index, 1);
+    setSelectedImages(newImages);
+  };
   return (
     <KeyboardAvoidingView
       style={{
@@ -199,7 +252,16 @@ export default function ChatScreen({ route }) {
         {messages
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
           .map((message) => {
-            if (message.typeMessage === "TEXT") {
+            if (message.content.includes("type:REPLY")) {
+              return (
+                <ReplyTextMessage
+                  key={message.id}
+                  content={{ uri: message.content.split(",").toString() }}
+                  createdAt={format(new Date(message.createdAt), "HH:mm")}
+                  isUser={message.userId !== userId}
+                ></ReplyTextMessage>
+              );
+            } else if (message.typeMessage === "TEXT") {
               return (
                 <TextMessage
                   key={message.id}
@@ -220,7 +282,7 @@ export default function ChatScreen({ route }) {
                 />
               );
             } else {
-              return null; // Return null for non-text messages
+              return null;
             }
           })}
       </ScrollView>
@@ -228,106 +290,137 @@ export default function ChatScreen({ route }) {
       {/* Form gửi tin nhắn */}
       <View
         style={{
-          backgroundColor: "white",
-          width: "100vw",
           display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          borderWidth: 1,
-          borderColor: "#eee",
-          padding: 10,
-          paddingTop: 0,
-          justifyContent: "space-between",
+          flexDirection: "column",
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
         }}
       >
-        {/* Sticker button */}
-        <TouchableOpacity
-          onPress={() => {
-            setShowEmojiPicker(!showEmojiPicker);
-          }}
-        >
-          <MaterialCommunityIconsIcon
-            name="sticker-emoji"
-            size={25}
-            color="828282"
-          />
-        </TouchableOpacity>
-        {/* Chứa sticker */}
-        {showEmojiPicker && (
-          <EmojiPicker
-            style={{
-              position: "absolute",
-              bottom: 90,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "90%",
-            }}
-            onEmojiClick={(emojiObject) => {
-              setMessageText(messageText + emojiObject.emoji);
-            }}
-          />
-        )}
-
-        <TextInput
-          style={{
-            height: 40,
-            margin: 15,
-            marginLeft: 5,
-            marginRight: 5,
-            backgroundColor: "transparent",
-            color: "#8C8F91",
-            flexGrow: 1,
-            fontSize: 18,
-            borderColor: "#ccc",
-            borderWidth: 1,
-            borderRadius: 5,
-            paddingLeft: 5,
-          }}
-          placeholder="Tin nhan"
-          value={messageText}
-          onChangeText={(text) => setMessageText(text)}
-        />
-
         <View
           style={{
+            backgroundColor: "white",
+            width: "100vw",
             display: "flex",
             flexDirection: "row",
-            gap: 10,
-            flexGrow: 1,
-            justifyContent: "space-between",
             alignItems: "center",
+            borderWidth: 1,
+            borderColor: "#eee",
+            padding: 10,
+            paddingTop: 0,
+            paddingBottom: 0,
+            justifyContent: "space-between",
+            gap: 15,
           }}
         >
-          <MaterialIconsIcon name="attach-file" size={25} color="828282" />
+          {/* Sticker button */}
           <TouchableOpacity
-            onPress={() => document.getElementById("imageInput").click()}
+            onPress={() => {
+              setShowEmojiPicker(!showEmojiPicker);
+            }}
           >
+            <MaterialCommunityIconsIcon
+              name="sticker-emoji"
+              size={25}
+              color="828282"
+            />
+          </TouchableOpacity>
+          {/* Chứa sticker */}
+          {showEmojiPicker && (
+            <EmojiPicker
+              style={{
+                position: "absolute",
+                bottom: 90,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "90%",
+              }}
+              onEmojiClick={(emojiObject) => {
+                setMessageText(messageText + emojiObject.emoji);
+              }}
+            />
+          )}
+
+          <TextInput
+            style={{
+              height: 40,
+              marginTop: 15,
+              marginBottom: 15,
+              backgroundColor: "transparent",
+              color: "#8C8F91",
+              flexGrow: 1,
+              fontSize: 18,
+              borderColor: "#ccc",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingLeft: 5,
+            }}
+            placeholder="Nhập tin nhắn"
+            value={messageText}
+            onChangeText={(text) => setMessageText(text)}
+          />
+          <TouchableOpacity onPress={handlePickImages}>
             <MaterialCommunityIconsIcon
               name="file-image"
               size={25}
               color="828282"
             />
-            <input
-              type="file"
-              id="imageInput"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={(event) => {
-                setMessageImage(event.target.files[0]);
-              }}
-            />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSendTextMessage}>
+          <TouchableOpacity
+            onPress={
+              messageType === "IMAGE"
+                ? handleSendImageMessage
+                : handleSendTextMessage
+            }
+          >
             <MaterialCommunityIconsIcon
               name="send"
               size={25}
-              color={messageImage || messageText !== "" ? "teal" : "828282"}
+              color={
+                (selectedImages.length !== 0) | (messageText !== "")
+                  ? "teal"
+                  : "828282"
+              }
             />
           </TouchableOpacity>
+        </View>
+        {/* Preview ảnh */}
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            width: "100%",
+            backgroundColor: "white",
+          }}
+        >
+          {selectedImages.map((imageUri, index) => (
+            <View
+              style={{
+                width: "33%",
+                height: 120,
+                borderWidth: 1,
+                borderColor: "#ccc",
+                backgroundColor: "white",
+              }}
+            >
+              <Image
+                source={{ uri: imageUri }}
+                style={{ width: "100%", height: "100%" }}
+              ></Image>
+              <TouchableOpacity
+                style={{
+                  position: "absolute",
+                  top: 5,
+                  right: 5,
+                }}
+                onPress={() => handleRemoveImage(index)}
+              >
+                <OcticonsIcon name="x-circle-fill" size={25} color="#ccc" />
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
       </View>
     </KeyboardAvoidingView>

@@ -9,16 +9,18 @@ import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
 import FriendRequestScreen from "./src/screens/FriendRequestScreen";
 import TooltipMessage from "./src/components/message/TooltipMessage";
+import CreateGroupScreen from "./src/screens/CreateGroupScreen";
 
 const Stack = createStackNavigator();
 const screenComponents = {
-  // AuthStackNavigator,
   AuthScreen,
   LoginScreen,
   RegisterScreen,
   BottomTabNavigator,
   ChatScreen,
   FriendRequestScreen,
+  CreateGroupScreen,
+  // ImagePickerExample,
 };
 export default function App() {
   return (
@@ -34,7 +36,7 @@ export default function App() {
         ))}
       </Stack.Navigator>
     </NavigationContainer>
-    // <TooltipMessage></TooltipMessage>
+    // <CreateGroupScreen></CreateGroupScreen>
   );
 }
 
