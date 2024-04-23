@@ -5,6 +5,7 @@ import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OcticonsIcon from "react-native-vector-icons/Octicons";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import EvilIconsIcon from "react-native-vector-icons/EvilIcons";
 export {
   AntDesignIcon,
   MaterialCommunityIconsIcon,
@@ -13,4 +14,5 @@ export {
   FontAwesome5Icon,
   OcticonsIcon,
   EntypoIcon,
+  EvilIconsIcon,
 };

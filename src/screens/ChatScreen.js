@@ -243,7 +243,16 @@ export default function ChatScreen({ route }) {
               : conversationName}
           </Text>
         </View>
-        <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("MemberGroupScreen", {
+              navigation,
+              conversationId,
+            })
+          }
+        >
+          <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
+        </TouchableOpacity>
       </View>
       {/* Content */}
       <ScrollView

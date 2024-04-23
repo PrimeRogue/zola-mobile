@@ -19,7 +19,24 @@ const conversationApi = {
       throw error;
     }
   },
+  fetchConversationById: async (conversationId, access_token) => {
+    try {
+      const response = await fetch(`${API_URL}/${conversationId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch conversation");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
   fetchMessagesByConversationId: async (conversationId, access_token) => {
     try {
       const response = await fetch(`${API_URL}/${conversationId}/messages`, {
@@ -112,6 +129,27 @@ const conversationApi = {
 
       if (!response.ok) {
         throw new Error("Failed to create conversation");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+  deleteMemberGroup: async (conversationId, userId, access_token) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/${conversationId}/group-member/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete member");
       }
 
       return response.json();

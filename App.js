@@ -10,6 +10,7 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 import FriendRequestScreen from "./src/screens/FriendRequestScreen";
 import TooltipMessage from "./src/components/message/TooltipMessage";
 import CreateGroupScreen from "./src/screens/CreateGroupScreen";
+import MemberGroupScreen from "./src/screens/MemberGroupScreen";
 
 const Stack = createStackNavigator();
 const screenComponents = {
@@ -20,6 +21,7 @@ const screenComponents = {
   ChatScreen,
   FriendRequestScreen,
   CreateGroupScreen,
+  MemberGroupScreen,
   // ImagePickerExample,
 };
 export default function App() {

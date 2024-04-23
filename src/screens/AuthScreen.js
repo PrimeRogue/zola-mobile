@@ -185,7 +185,9 @@ export default function AuthScreen({ route }) {
 const authScreenSlider = [
   {
     id: "1",
-    image: require("../../assets/Auth/1.PNG"),
+    image: {
+      uri: "https://res.cloudinary.com/drqbhj6ft/image/upload/v1713484698/1_ae8hsg.png",
+    },
     title: "Gọi video ổn định",
     desc: "Trò chuyện thật đã với chất lượng video ổn định mọi lúc, mọi nơi",
     titleTran: "Stable video calling",
@@ -193,7 +195,9 @@ const authScreenSlider = [
   },
   {
     id: "2",
-    image: require("../../assets/Auth/2.PNG"),
+    image: {
+      uri: "https://res.cloudinary.com/drqbhj6ft/image/upload/v1713484698/2_xohccl.png",
+    },
     title: "Chat nhóm tiện ích",
     desc: "Nơi cùng nhau trao đổi, giữ liên lạc với gia đình, bạn bè, đồng nghiệp...",
     titleTran: "Utility group chat",
@@ -202,7 +206,9 @@ const authScreenSlider = [
   },
   {
     id: "3",
-    image: require("../../assets/Auth/3.PNG"),
+    image: {
+      uri: "https://res.cloudinary.com/drqbhj6ft/image/upload/v1713484698/3_flmawl.png",
+    },
     title: "Gọi video ổn định",
     desc: "Trò chuyện thật đã với chất lượng video ổn định mọi lúc, mọi nơi",
     titleTran: "Stable video calling",

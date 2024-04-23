@@ -5,6 +5,7 @@ import {
 } from "../../utils/ConversationUtils";
 import { formatDistance } from "date-fns";
 import { Image, TouchableOpacity, View, Text } from "react-native";
+import { EvilIconsIcon } from "../../utils/IconUtils";
 
 const ConversationItem = ({
   conversation,
@@ -25,7 +26,6 @@ const ConversationItem = ({
         width: "100%",
         display: "flex",
         flexDirection: "row",
-        paddingLeft: 5,
         alignItems: "center",
         borderBlockColor: "#ccc",
         borderBottomWidth: 1,
@@ -45,8 +45,8 @@ const ConversationItem = ({
         })
       }
     >
-      <Image
-        source={getConversationAvatar(conversation, userId)}
+      <View
+        // source={getConversationAvatar(conversation, userId)}
         style={{
           width: 60,
           height: 60,
@@ -56,8 +56,15 @@ const ConversationItem = ({
           marginRight: 20,
           borderWidth: 2,
           borderColor: "#ccc",
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#ccc",
         }}
-      />
+      >
+        <EvilIconsIcon name="user" size={90} color="white" />
+      </View>
       <View>
         <Text style={{ fontSize: 18, fontWeight: 500 }}>
           {conversation?.isGroup

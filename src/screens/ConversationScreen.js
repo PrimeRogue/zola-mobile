@@ -115,37 +115,46 @@ export default function ConversationScreen({ route }) {
           <AntDesignIcon name="addusergroup" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
-      <ScrollView
+      <View
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 10,
+          height: "100vh",
           width: "100%",
         }}
       >
-        {conversationData.length !== 0 && userId !== "" ? (
-          conversationData.map((conversation, index) => (
-            <ConversationItem
-              key={index}
-              conversation={conversation}
-              userId={userId}
-              navigation={navigation}
-              setIsMessagesChanged={setIsMessagesChanged}
-            ></ConversationItem>
-          ))
-        ) : (
-          <Text
-            style={{
-              textAlign: "center",
-              padding: 10,
-              paddingTop: 15,
-              fontSize: 16,
-            }}
-          >
-            Chưa có cuộc trò chuyện nào
-          </Text>
-        )}
-      </ScrollView>
+        <ScrollView
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            width: "100%",
+          }}
+        >
+          {conversationData.length !== 0 && userId !== "" ? (
+            conversationData.map((conversation, index) => (
+              <ConversationItem
+                key={index}
+                conversation={conversation}
+                userId={userId}
+                navigation={navigation}
+                setIsMessagesChanged={setIsMessagesChanged}
+              ></ConversationItem>
+            ))
+          ) : (
+            <Text
+              style={{
+                textAlign: "center",
+                padding: 10,
+                paddingTop: 15,
+                fontSize: 16,
+              }}
+            >
+              Chưa có cuộc trò chuyện nào
+            </Text>
+          )}
+        </ScrollView>
+      </View>
     </View>
   );
 }
