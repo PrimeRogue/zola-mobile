@@ -45,8 +45,8 @@ const ConversationItem = ({
         })
       }
     >
-      <View
-        // source={getConversationAvatar(conversation, userId)}
+      <Image
+        source={{ uri: conversation.participants[1].photoUrl }}
         style={{
           width: 60,
           height: 60,
@@ -56,23 +56,16 @@ const ConversationItem = ({
           marginRight: 20,
           borderWidth: 2,
           borderColor: "#ccc",
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
           backgroundColor: "#ccc",
         }}
-      >
-        <EvilIconsIcon name="user" size={90} color="white" />
-      </View>
+      ></Image>
       <View>
         <Text style={{ fontSize: 18, fontWeight: 500 }}>
           {conversation?.isGroup
-            ? conversation.groupName.length > 15
-              ? `${conversation.groupName.substring(0, 15)}...`
+            ? conversation.groupName.length > 20
+              ? `${conversation.groupName.substring(0, 20)}...`
               : conversation.groupName
-            : formatConversationName(conversation, userId).substring(0, 15) +
-              "..."}
+            : formatConversationName(conversation, userId).substring(0, 20)}
         </Text>
         <Text style={{ fontSize: 16, fontWeight: 500, color: "#848C8F" }}>
           {`${

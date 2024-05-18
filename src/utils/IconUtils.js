@@ -6,6 +6,9 @@ import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OcticonsIcon from "react-native-vector-icons/Octicons";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import EvilIconsIcon from "react-native-vector-icons/EvilIcons";
+import FeatherIcon from "react-native-vector-icons/Feather";
+const noAvatar =
+  "https://www.pngall.com/wp-content/uploads/5/Profile-PNG-Images.png";
 export {
   AntDesignIcon,
   MaterialCommunityIconsIcon,
@@ -15,4 +18,6 @@ export {
   OcticonsIcon,
   EntypoIcon,
   EvilIconsIcon,
+  FeatherIcon,
+  noAvatar,
 };

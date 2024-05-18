@@ -17,7 +17,10 @@ import {
   MaterialCommunityIconsIcon,
   IoniconsIcon,
   MaterialIconsIcon,
+  FontAwesome5Icon,
   OcticonsIcon,
+  EntypoIcon,
+  EvilIconsIcon,
 } from "../utils/IconUtils";
 
 import { useNavigation } from "@react-navigation/native";

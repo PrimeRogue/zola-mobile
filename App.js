@@ -11,6 +11,7 @@ import FriendRequestScreen from "./src/screens/FriendRequestScreen";
 import TooltipMessage from "./src/components/message/TooltipMessage";
 import CreateGroupScreen from "./src/screens/CreateGroupScreen";
 import MemberGroupScreen from "./src/screens/MemberGroupScreen";
+import ContactScreen from "./src/screens/ContactScreen";
 
 const Stack = createStackNavigator();
 const screenComponents = {
@@ -38,7 +39,7 @@ export default function App() {
         ))}
       </Stack.Navigator>
     </NavigationContainer>
-    // <CreateGroupScreen></CreateGroupScreen>
+    // <ContactScreen></ContactScreen>
   );
 }
 

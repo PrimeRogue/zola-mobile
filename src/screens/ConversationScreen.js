@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Text, View, Image, TouchableOpacity } from "react-native";
-import AntDesignIcon from "react-native-vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -10,6 +9,16 @@ import conversationApi from "../api/ConversationApi";
 import ConversationItem from "../components/conversation/ConversationItem";
 import userApi from "../api/UserApi";
 import { ScrollView } from "react-native-gesture-handler";
+import {
+  AntDesignIcon,
+  MaterialCommunityIconsIcon,
+  IoniconsIcon,
+  MaterialIconsIcon,
+  FontAwesome5Icon,
+  OcticonsIcon,
+  EntypoIcon,
+  EvilIconsIcon,
+} from "../utils/IconUtils";
 export default function ConversationScreen({ route }) {
   const [isMessagesChanged, setIsMessagesChanged] = useState(false);
   const [isCreateGroup, setIsCreateGroup] = useState(false);
@@ -112,7 +121,7 @@ export default function ConversationScreen({ route }) {
             })
           }
         >
-          <AntDesignIcon name="addusergroup" size={18} color="#fff" />
+          <AntDesignIcon name="addusergroup" size={25} color="#fff" />
         </TouchableOpacity>
       </View>
       <View

@@ -18,6 +18,10 @@ import {
   IoniconsIcon,
   MaterialIconsIcon,
   FontAwesome5Icon,
+  OcticonsIcon,
+  EntypoIcon,
+  EvilIconsIcon,
+  noAvatar,
 } from "../utils/IconUtils";
 
 import { useNavigation } from "@react-navigation/native";
@@ -38,49 +42,53 @@ export default function ContactScreen({ route }) {
   const [isModalVisible, setModalVisible] = useState(false);
   const [notification, setNotification] = useState({});
   const [userId, setUserId] = useState("");
+  const [sentRequest, setSentRequest] = useState([false, []]);
   const navigation = useNavigation();
   // Tạo kênh thông báo
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-
+  // render all friend
+  const getAllFriend = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const contactData = await contactApi.getAllContact(accessToken);
+      const allFriendData = await contactApi.getAllFriend(accessToken);
+      const me = await userApi.getMe(accessToken);
+      console.log(contactData);
+      setUserId(me.id);
+      setContactData(contactData);
+      setCloneContactData(contactData);
+      setAllFriendData(allFriendData);
+    } catch (error) {
+      console.error(error.code);
+    }
+  };
   // 2. Fetch danh sách Contact đề xuất
   useEffect(() => {
-    const getAllContactAndFriend = async () => {
-      try {
-        const accessToken = await AsyncStorage.getItem("accessToken");
-        const contactData = await contactApi.getAllContact(accessToken);
-        const allFriendData = await contactApi.getAllFriend(accessToken);
-        const me = await userApi.getMe(accessToken);
-        setUserId(me.id);
-        setContactData(contactData);
-        setCloneContactData(contactData);
-        setAllFriendData(allFriendData);
-      } catch (error) {
-        console.error(error.code);
-      }
-    };
-
-    getAllContactAndFriend();
-  }, [accessToken]);
+    getAllFriend();
+  }, []);
 
   // 3. handle send friend request
   const handleSendFriendRequest = async (friendId) => {
     try {
-      const accessToken = await AsyncStorage.getItem("accessToken");
-      console.log("get access token:", accessToken);
-      const data = await contactApi.sendFriendRequest(accessToken, friendId);
-      const { status } = data;
-      const title =
-        status === 201 ? "Friend Request Sent" : "Friend Request Pending";
-      const message =
-        status === 201
-          ? "Your friend request has been sent successfully."
-          : "Your friend request is pending.";
+      if (!sentRequest[1].includes(friendId)) {
+        const accessToken = await AsyncStorage.getItem("accessToken");
+        console.log("get access token:", accessToken);
+        const data = await contactApi.sendFriendRequest(accessToken, friendId);
+        const { status } = data;
+        const title =
+          status === 201 ? "Friend Request Sent" : "Friend Request Pending";
+        const message =
+          status === 201
+            ? "Your friend request has been sent successfully."
+            : "Your friend request is pending.";
 
-      // Gửi thông báo
-      await sendNotification(title, message);
-      setNotification({ title: title, message: message });
+        // Gửi thông báo
+        await sendNotification(title, message);
+        setNotification({ title: title, message: message });
+        setSentRequest((prevState) => [true, [...prevState[1], friendId]]);
+      }
     } catch (error) {
       // Xử lý lỗi
       console.error("Error sending friend request:", error);
@@ -95,25 +103,58 @@ export default function ContactScreen({ route }) {
   };
 
   // 4. Redirect chat user
-  const handleRedirectChat = async (friendId) => {
+  const handleRedirectChat = async (friendId, friendName) => {
     // fecth conversations
     const accessToken = await AsyncStorage.getItem("accessToken");
     const conversations = await conversationApi.fetchConversation(accessToken);
     const filteredItems = conversations.list.filter(
       (item) => !item.isGroup && item.participants[1].id === friendId
     );
-    navigation.navigate("ChatScreen", {
-      conversationId: filteredItems[0].id,
-      conversationName:
-        filteredItems[0].participants[1].displayName.length > 27
-          ? `${filteredItems[0].participants[1].displayName.substring(
-              0,
-              27
-            )}...`
-          : filteredItems[0].participants[1].displayName,
-      userId: userId,
-      navigation: navigation,
-    });
+    console.log(accessToken);
+    if (filteredItems.length !== 0) {
+      navigation.navigate("ChatScreen", {
+        conversationId: filteredItems[0].id,
+        conversationName:
+          filteredItems[0].participants[1].displayName.length > 27
+            ? `${filteredItems[0].participants[1].displayName.substring(
+                0,
+                27
+              )}...`
+            : filteredItems[0].participants[1].displayName,
+        userId: userId,
+        navigation: navigation,
+      });
+    } else {
+      const data = await conversationApi.createConversation(
+        [friendId],
+        null,
+        accessToken
+      );
+      console.log(data);
+
+      if (data !== "") {
+        navigation.navigate("ChatScreen", {
+          conversationId: data.id,
+          conversationName:
+            friendName.length > 27
+              ? `${friendName.substring(0, 27)}...`
+              : friendName,
+          userId: userId,
+          navigation: navigation,
+        });
+      }
+    }
+  };
+
+  // 5. handle delete friend
+  const handleDeleteFriend = async (friendId) => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const data = await contactApi.removeFriend(accessToken, friendId);
+      getAllFriend();
+    } catch (error) {
+      console.error("Error accept friend request:", error);
+    }
   };
 
   return (
@@ -146,41 +187,11 @@ export default function ContactScreen({ route }) {
         }}
       >
         <Text style={{ color: "white", fontSize: 18, fontWeight: "500" }}>
-          Bạn bè
+          Danh bạ
         </Text>
-        <TouchableOpacity onPress={toggleModal}>
-          <AntDesignIcon name="adduser" size={25} color="#fff" />
-        </TouchableOpacity>
       </View>
       {/* Content */}
-      {/* Tìm kiếm bạn bè */}
-      <TouchableOpacity
-        style={{
-          width: "100%",
-          padding: 10,
-          paddingTop: 15,
-          paddingBottom: 15,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          borderBottom: "1px solid #ccc",
-        }}
-      >
-        <View
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: "50%",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "teal",
-          }}
-        >
-          <AntDesignIcon name="search1" size={18} color="#fff" />
-        </View>
-        <Text style={{ fontSize: 16 }}>Tìm kiếm bạn bè</Text>
-      </TouchableOpacity>
+
       {/* Lời mời kết bạn */}
       <TouchableOpacity
         style={{
@@ -206,9 +217,64 @@ export default function ContactScreen({ route }) {
             backgroundColor: "teal",
           }}
         >
-          <FontAwesome5Icon name="user-friends" size={18} color="#fff" />
+          <AntDesignIcon name="addusergroup" size={18} color="#fff" />
         </View>
         <Text style={{ fontSize: 16 }}>Lời mời kết bạn</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{
+          width: "100%",
+          padding: 10,
+          paddingTop: 15,
+          paddingBottom: 15,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          borderBottom: "1px solid #ccc",
+        }}
+        onPress={toggleModal}
+      >
+        <View
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "teal",
+          }}
+        >
+          <AntDesignIcon name="adduser" size={18} color="#fff" />
+        </View>
+        <Text style={{ fontSize: 16 }}>Gửi yêu cầu kết bạn</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{
+          width: "100%",
+          padding: 10,
+          paddingTop: 15,
+          paddingBottom: 15,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          borderBottom: "1px solid #ccc",
+        }}
+      >
+        <View
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "teal",
+          }}
+        >
+          <IoniconsIcon name="people-outline" size={18} color="#fff" />
+        </View>
+        <Text style={{ fontSize: 16 }}>Danh sách nhóm</Text>
       </TouchableOpacity>
       {/* Danh sách bạn bè */}
       <View
@@ -268,7 +334,7 @@ export default function ContactScreen({ route }) {
                   height: 50,
                   borderRadius: "50%",
                   resizeMode: "cover",
-                  backgroundColor: "white",
+                  backgroundColor: "#ccc",
                   borderWidth: 1,
                   borderColor: "#ccc",
                 }}
@@ -282,15 +348,19 @@ export default function ContactScreen({ route }) {
               >
                 <Text
                   style={{
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: "bold",
                     wordWrap: "break-word",
                   }}
                 >
-                  {item.friend.displayName.substring(0, 15) + "..."}
+                  {item.friend.displayName.length > 15
+                    ? item.friend.displayName.substring(0, 15) + "..."
+                    : item.friend.displayName}
                 </Text>
-                <Text style={{ fontSize: 14, color: "#ccc" }}>
-                  {item.friend.email.substring(0, 20)}
+                <Text style={{ fontSize: 16, color: "#ccc" }}>
+                  {item.friend.email.length > 25
+                    ? item.friend.email.substring(0, 25) + "..."
+                    : item.friend.email}
                 </Text>
               </View>
             </View>
@@ -313,7 +383,9 @@ export default function ContactScreen({ route }) {
                   height: 40,
                   borderRadius: 5,
                 }}
-                onPress={() => handleRedirectChat(item.friendId)}
+                onPress={() =>
+                  handleRedirectChat(item.friend.id, item.friend.displayName)
+                }
               >
                 <AntDesignIcon name="message1" size={18} color="#fff" />
               </TouchableOpacity>
@@ -327,7 +399,7 @@ export default function ContactScreen({ route }) {
                   height: 40,
                   borderRadius: 5,
                 }}
-                // onPress={() => handleSendFriendRequest(item.id)}
+                onPress={() => handleDeleteFriend(item.friend.id)}
               >
                 <AntDesignIcon name="deleteuser" size={18} color="#fff" />
               </TouchableOpacity>
@@ -360,7 +432,7 @@ export default function ContactScreen({ route }) {
             style={{
               width: "100%",
               backgroundColor: "white",
-              height: "60vh",
+              height: "75vh",
               borderRadius: 5,
               borderColor: "#ccc",
               borderWidth: 1,
@@ -464,13 +536,13 @@ export default function ContactScreen({ route }) {
                     }}
                   >
                     <Image
-                      // source={{item.photo}}}
+                      source={{ uri: item.photoUrl }}
                       style={{
                         width: 50,
                         height: 50,
                         borderRadius: "50%",
                         resizeMode: "cover",
-                        backgroundColor: "white",
+                        backgroundColor: "#ccc",
                         borderWidth: 1,
                         borderColor: "#ccc",
                       }}
@@ -489,10 +561,14 @@ export default function ContactScreen({ route }) {
                           wordWrap: "break-word",
                         }}
                       >
-                        {item.displayName.substring(0, 15) + "..."}
+                        {item.displayName.length > 15
+                          ? item.displayName.substring(0, 15) + "..."
+                          : item.displayName}
                       </Text>
                       <Text style={{ fontSize: 14, color: "#ccc" }}>
-                        {item.email.substring(0, 20)}
+                        {item.email.length > 20
+                          ? item.email.substring(0, 20) + "..."
+                          : item.email}
                       </Text>
                     </View>
                   </View>
@@ -501,7 +577,10 @@ export default function ContactScreen({ route }) {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: "teal",
+                      backgroundColor:
+                        sentRequest[0] && sentRequest[1].includes(item.id)
+                          ? "#ccc"
+                          : "teal",
                       width: 50,
                       height: 40,
                       borderRadius: 5,

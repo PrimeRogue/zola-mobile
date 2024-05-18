@@ -5,14 +5,25 @@ import {
   TextInput,
   KeyboardAvoidingView,
   CheckBox,
+  Image,
 } from "react-native";
-import AntDesignIcon from "react-native-vector-icons/AntDesign";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Formik } from "formik";
 import * as yup from "yup";
 import authAPI from "../api/AuthApi";
+import {
+  AntDesignIcon,
+  MaterialCommunityIconsIcon,
+  IoniconsIcon,
+  MaterialIconsIcon,
+  FontAwesome5Icon,
+  OcticonsIcon,
+  EntypoIcon,
+  EvilIconsIcon,
+} from "../utils/IconUtils";
 const RegisterScreen = ({ navigation }) => {
   const [username, setUserName] = useState("");
+  const [email, setEmail] = useState("");
   const [isValidForm, setIsValidForm] = useState(false);
   const [weakPassword, setWeakPassword] = useState("");
   // validate with yup
@@ -44,17 +55,12 @@ const RegisterScreen = ({ navigation }) => {
   // handle register
   const handleRegister = async (userInfo) => {
     try {
-      // Gọi phương thức register từ đối tượng authAPI
       const response = await authAPI.register(userInfo);
-      if (userInfo.email === "buitranthienan1111@gmail.com") setCurrentTab(4);
-      // Trả về dữ liệu phản hồi nếu quá trình đăng ký thành công
-      else setCurrentTab(3);
+      setCurrentTab(userInfo.email === email ? 4 : 3);
       return response;
     } catch (error) {
-      // Xử lý lỗi nếu quá trình đăng ký gặp vấn đề
-      if (error.code === "email-already-in-use") setCurrentTab(4);
-      else setCurrentTab(3);
-      throw error; // Rethrow lỗi để cho phép các thành phần khác xử lý nếu cần
+      setCurrentTab(error.error?.code === "email-already-in-use" ? 4 : 3);
+      throw error;
     }
   };
 
@@ -86,113 +92,40 @@ const RegisterScreen = ({ navigation }) => {
         <Text style={{ fontSize: 18, color: "white" }}>Tạo tài khoản</Text>
       </View>
       {/* Tab */}
-      {currentTab === 5 && (
-        <View
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontWeight: "bold",
-              textAlign: "center",
-              fontSize: 18,
-              marginTop: 40,
-              marginBottom: 40,
-            }}
-          >
-            Email chưa được xác thực
-          </Text>
-          <View
-            style={{
-              width: 70,
-              height: 70,
-              backgroundColor: "#FF6666",
-              borderRadius: "50%",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 10,
-            }}
-          >
-            <AntDesignIcon name="close" size={30} color="#F0F3FC" />
-          </View>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>*****</Text>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                backgroundColor: "teal",
-                borderRadius: 5,
-                padding: 15,
-                width: "100%",
-                marginTop: 40,
-              }}
-              onPress={() => goToPrevTab(2)}
-            >
-              <Text style={{ fontWeight: 500, fontSize: 16, color: "white" }}>
-                Dùng Email khác
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "teal",
-                borderRadius: 5,
-                padding: 15,
-                width: "100%",
-                marginTop: 40,
-              }}
-              onPress={() => navigation.navigate("LoginScreen")}
-            >
-              <Text style={{ fontWeight: 500, fontSize: 16, color: "white" }}>
-                Đăng nhập Email này
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
       {currentTab === 4 && (
         <View
           style={{
             width: "100%",
+            height: "100vh",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
           }}
         >
+          <Image
+            source={{
+              uri: "https://res.cloudinary.com/drqbhj6ft/image/upload/v1715978000/account-exist_z8cked.png",
+            }}
+            style={{
+              width: "100%",
+              height: "50vh",
+              resizeMode: "contain",
+              borderBottomWidth: 1,
+              borderBottomColor: "#ccc",
+              backgroundColor: "teal",
+            }}
+          />
           <Text
             style={{
               fontWeight: "bold",
               textAlign: "center",
-              fontSize: 18,
+              fontSize: 20,
               marginTop: 40,
               marginBottom: 40,
             }}
           >
-            Đã tồn tại 1 tài khoản Zalo được gắn với Email này
+            Tài khoản đã tồn tại
           </Text>
-          <View
-            style={{
-              width: 70,
-              height: 70,
-              backgroundColor: "#CFD7E2",
-              borderRadius: "50%",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 10,
-            }}
-          >
-            <AntDesignIcon name="user" size={30} color="#F0F3FC" />
-          </View>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>*****</Text>
           <View
             style={{
               display: "flex",
@@ -236,37 +169,36 @@ const RegisterScreen = ({ navigation }) => {
         <View
           style={{
             width: "100%",
+            height: "100vh",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
           }}
         >
+          <Image
+            source={{
+              uri: "https://res.cloudinary.com/drqbhj6ft/image/upload/v1715978001/verify-account_yqsxvy.png",
+            }}
+            style={{
+              width: "100%",
+              height: "50vh",
+              resizeMode: "contain",
+              borderBottomWidth: 1,
+              borderBottomColor: "#ccc",
+              backgroundColor: "teal",
+            }}
+          />
           <Text
             style={{
               fontWeight: "bold",
               textAlign: "center",
-              fontSize: 18,
+              fontSize: 20,
               marginTop: 40,
               marginBottom: 40,
             }}
           >
-            Tạo tài khoản thành công
+            Vui lòng xác thực tài khoản của bạn
           </Text>
-          <View
-            style={{
-              width: 70,
-              height: 70,
-              backgroundColor: "teal",
-              borderRadius: "50%",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 10,
-            }}
-          >
-            <AntDesignIcon name="check" size={30} color="#F0F3FC" />
-          </View>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>{username}</Text>
-          <Text style={{ color: "#CFD7E2", fontSize: 16 }}>buitran@gmail</Text>
           <TouchableOpacity
             style={{
               backgroundColor: "teal",
@@ -341,13 +273,21 @@ const RegisterScreen = ({ navigation }) => {
                 <TextInput
                   style={{
                     height: 40,
-                    borderBottomColor: "#ccc",
-                    borderBottomWidth: 1,
                     margin: 15,
+                    marginTop: 0,
                     backgroundColor: "transparent",
                     color: "#8C8F91",
+                    flexGrow: 1,
+                    fontSize: 18,
+                    borderColor: "#ccc",
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    paddingLeft: 5,
                   }}
-                  onChangeText={handleChange("email")}
+                  onChangeText={(text) => {
+                    handleChange("email")(text); // Update Formik's state
+                    setEmail(text); // Update external state
+                  }}
                   onBlur={handleBlur("email")}
                   value={values.email}
                   placeholder="Email"
@@ -358,12 +298,16 @@ const RegisterScreen = ({ navigation }) => {
                 <TextInput
                   style={{
                     height: 40,
-                    borderBottomColor: "#ccc",
-                    borderBottomWidth: 1,
                     margin: 15,
                     marginTop: 0,
                     backgroundColor: "transparent",
                     color: "#8C8F91",
+                    flexGrow: 1,
+                    fontSize: 18,
+                    borderColor: "#ccc",
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    paddingLeft: 5,
                   }}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
