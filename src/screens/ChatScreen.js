@@ -1,16 +1,14 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import * as DocumentPicker from "expo-document-picker";
 import { useState, useRef, useEffect } from "react";
 import {
   Text,
   View,
-  Pressable,
   Image,
-  FlatList,
   TouchableOpacity,
   Modal,
   TextInput,
-  Dimensions,
 } from "react-native";
 import {
   AntDesignIcon,
@@ -35,6 +33,8 @@ import EmojiPicker from "emoji-picker-react";
 import * as ImagePicker from "expo-image-picker";
 import base64toFile from "../utils/FileUtils";
 import ReplyTextMessage from "../components/message/ReplyTextMessage";
+import VideoMessage from "../components/message/VideoMessage";
+import FileMessage from "../components/message/FileMessage";
 export default function ChatScreen({ route }) {
   const {
     conversationId,
@@ -42,26 +42,27 @@ export default function ChatScreen({ route }) {
     navigation,
     userId,
     setIsMessagesChanged,
+    photoUrl,
   } = route.params;
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
   const [messageType, setMessageType] = useState("TEXT");
   const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [dataReceived, setDataReceived] = useState({});
+  const [me, setMe] = useState(null);
+
   const [socket, setSocket] = useState({
     rootSocket: null,
     chatSocket: null,
   });
-  const [messageSent, setMessageSent] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [image, setImage] = useState(null);
-  const scrollViewRef = useRef(); // Create a ref for ScrollView
+  const scrollViewRef = useRef();
   useEffect(() => {
-    // Scroll to the end of ScrollView when messages change
     scrollViewRef.current.scrollToEnd({ animated: true });
   }, [messages]);
 
-  // Connect socket
+  // Connect socket chatting
   useEffect(() => {
     const chatSocket = getSocket("/chats", {
       autoConnect: false,
@@ -80,16 +81,16 @@ export default function ChatScreen({ route }) {
         };
       });
     }
-    console.log("Kết nối socket thành công");
     return () => {
       chatSocket.disconnect();
     };
   }, [conversationId, setSocket]);
 
-  // 1. fecth tin nhắn sau khi có tin nhắn mới được gửi ngay lập tức
+  // Fetch tin nhắn
   const fetchMessages = async () => {
     try {
       const storedAccessToken = await AsyncStorage.getItem("accessToken");
+      console.log(storedAccessToken);
       const data = await conversationApi.fetchMessagesByConversationId(
         conversationId,
         storedAccessToken
@@ -99,10 +100,13 @@ export default function ChatScreen({ route }) {
       console.log(error);
     }
   };
+
+  // Fecth tin nhắn lần đầu khi nhấn vào conversation
   useEffect(() => {
     fetchMessages();
   }, [conversationId]);
-  // 4. Handle sending text message
+
+  // Handle sending text message
   const handleSendTextMessage = async () => {
     try {
       const storedAccessToken = await AsyncStorage.getItem("accessToken");
@@ -114,11 +118,9 @@ export default function ChatScreen({ route }) {
     } catch (error) {
       console.error(error.message + "--" + error.code);
     }
-    console.log("message type are TEXT");
   };
 
   const handleSendImageMessage = async () => {
-    console.log("message type are IMAGE");
     try {
       const files = [];
       for (let i = 0; i < selectedImages.length; i++) {
@@ -143,8 +145,6 @@ export default function ChatScreen({ route }) {
         }
       }
 
-      console.log("Files converted:", files);
-
       const storedAccessToken = await AsyncStorage.getItem("accessToken");
       files.forEach(async (item) => {
         const formData = new FormData();
@@ -162,7 +162,73 @@ export default function ChatScreen({ route }) {
     setMessageType("TEXT");
   };
 
-  // 5. Xử lý các event socket
+  const handleSendFileMessage = async () => {
+    try {
+      const files = [];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        if (/^data:application\/pdf;base64,/.test(selectedFiles[i])) {
+          // If the base64 data starts with 'data:application/pdf;base64,', remove the header
+          const base64Data = selectedFiles[i].replace(
+            /^data:application\/pdf;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "file.pdf");
+          files.push(file);
+        } else if (/^data:application\/msword;base64,/.test(selectedFiles[i])) {
+          // If the base64 data starts with 'data:application/msword;base64,', remove the header
+          const base64Data = selectedFiles[i].replace(
+            /^data:application\/msword;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "file.doc");
+          files.push(file);
+        } else if (
+          /^data:application\/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,/.test(
+            selectedFiles[i]
+          )
+        ) {
+          const base64Data = selectedFiles[i].replace(
+            /^data:application\/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "file.docx");
+          files.push(file);
+        } else if (/^data:video\/mp4;base64,/.test(selectedFiles[i])) {
+          // If the base64 data starts with 'data:video/mp4;base64,', remove the header
+          const base64Data = selectedFiles[i].replace(
+            /^data:video\/mp4;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "video.mp4");
+          files.push(file);
+        } else if (/^data:text\/plain;base64,/.test(selectedFiles[i])) {
+          const base64Data = selectedFiles[i].replace(
+            /^data:text\/plain;base64,/,
+            ""
+          );
+          const file = base64toFile(base64Data, "file.txt");
+          files.push(file);
+        } else {
+          console.error("Invalid base64 format:", selectedFiles[i]);
+        }
+      }
+
+      const storedAccessToken = await AsyncStorage.getItem("accessToken");
+      files.forEach(async (item) => {
+        const formData = new FormData();
+        formData.append("file", item);
+        const data = await conversationApi.sendFileMessage(
+          conversationId,
+          formData,
+          storedAccessToken
+        );
+      });
+    } catch (error) {
+      console.error(error.message + "--" + error.code);
+    }
+    setMessageType("TEXT");
+  };
+  // Xử lý các event socket
   useEffect(() => {
     if (socket.chatSocket) {
       const handleSentMessage = (data) => {
@@ -171,6 +237,7 @@ export default function ChatScreen({ route }) {
         fetchMessages();
         setMessageText("");
         setSelectedImages([]);
+        setSelectedFiles([]);
         setShowEmojiPicker(false);
         setIsMessagesChanged(true);
       };
@@ -198,13 +265,96 @@ export default function ChatScreen({ route }) {
     setSelectedImages(result.assets.map((asset) => asset.uri));
     setMessageType("IMAGE");
   };
+  const handlePickFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*", // Allow all file types
+        multiple: true, // Allow multiple selection
+      });
 
+      if (result.type === "cancel") {
+        return;
+      }
+
+      setSelectedFiles(result.assets.map((asset) => asset.uri));
+      setMessageType("FILE");
+    } catch (error) {
+      console.error("Error picking file:", error);
+    }
+  };
   // 7. Handle Remove Image
   const handleRemoveImage = (index) => {
     const newImages = [...selectedImages];
     newImages.splice(index, 1);
     setSelectedImages(newImages);
   };
+
+  const handleRemoveFile = (index) => {
+    const newFile = [...selectedFiles];
+    newFile.splice(index, 1);
+    setSelectedFiles(newFile);
+  };
+
+  // 8. Handle Send Message
+  const handleSendMessage = () => {
+    if (messageType === "IMAGE") {
+      handleSendImageMessage();
+    } else if (messageType === "TEXT") {
+      handleSendTextMessage();
+    } else if (messageType === "FILE") {
+      handleSendFileMessage();
+    }
+  };
+
+  const renderIcon = (type) => {
+    switch (type) {
+      case "video/mp4":
+        return (
+          <MaterialIconsIcon name="video-library" size={70} color="#000" />
+        );
+      case "application/pdf":
+        return <AntDesignIcon name="pdffile1" size={70} color="#F79B3F" />;
+      case "application/vnd.ms-excel":
+      case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+      case "application/x-excel":
+      case "application/x-msexcel":
+      case "application/x-ms-excel":
+      case "application/xls":
+      case "application/xlsx":
+        return <AntDesignIcon name="exclefile1" size={70} color="#1F7145" />;
+      case "application/msword":
+      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      case "application/vnd.ms-word":
+      case "application/word":
+      case "application/x-msword":
+        return <AntDesignIcon name="wordfile1" size={70} color="#1E90FF" />;
+      case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        return <AntDesignIcon name="pptfile1" size={70} color="#C43E1C" />;
+      case "image/gif":
+        return <MaterialIconsIcon name="gif" size={70} color="#1E90FF" />;
+      case "application/zip":
+        return <AntDesignIcon name="database" size={70} color="#EFC95A" />;
+      case "application/x-rar-compressed":
+      case "application/rar":
+      case "application/x-rar":
+      case "application/x-rar-compressed":
+        return <AntDesignIcon name="database" size={70} color="#EFC95A" />;
+      case "text/plain":
+        return <AntDesignIcon name="filetext1" size={70} color="#ccc" />;
+      case "image/png":
+      case "image/jpeg":
+        return <AntDesignIcon name="jpgfile1" size={70} color="#EFC95A" />;
+      default:
+        return <AntDesignIcon name="folder1" size={70} color="#000" />;
+    }
+  };
+
+  const renderFileName = (content) => {
+    let extractFileName1 = content.split("/").reverse();
+    let extractFileName2 = extractFileName1[0].split("-").reverse();
+    return extractFileName2[0];
+  };
+
   return (
     <KeyboardAvoidingView
       style={{
@@ -220,6 +370,7 @@ export default function ChatScreen({ route }) {
       <View
         style={{
           width: "100%",
+          height: 65,
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
@@ -246,16 +397,37 @@ export default function ChatScreen({ route }) {
               : conversationName}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("MemberGroupScreen", {
-              navigation,
-              conversationId,
-            })
-          }
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 20,
+          }}
         >
-          <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("VideoCallScreen", {
+                navigation,
+                conversationId,
+              })
+            }
+          >
+            <MaterialCommunityIconsIcon name="video" size={25} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("MemberGroupScreen", {
+                navigation,
+                conversationId,
+                userId,
+                userName: "aa",
+              })
+            }
+          >
+            <MaterialCommunityIconsIcon name="menu" size={25} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
       {/* Content */}
       <ScrollView
@@ -295,6 +467,7 @@ export default function ChatScreen({ route }) {
                   isUser={message.userId !== userId}
                   messageCuid={message.cuid}
                   conversationId={conversationId}
+                  photoUrl={photoUrl}
                 />
               );
             } else if (message.typeMessage === "IMAGE") {
@@ -306,8 +479,51 @@ export default function ChatScreen({ route }) {
                   isUser={message.userId !== userId}
                   conversationId={conversationId}
                   messageCuid={message.cuid}
+                  photoUrl={photoUrl}
                 />
               );
+            } else if (message.typeMessage === "VIDEO") {
+              return (
+                <VideoMessage
+                  key={message.id}
+                  content={message.content.split(",").toString()}
+                  createdAt={format(new Date(message.createdAt), "HH:mm")}
+                  isUser={message.userId !== userId}
+                  conversationId={conversationId}
+                  messageCuid={message.cuid}
+                  photoUrl={photoUrl}
+                />
+              );
+            } else if (message.typeMessage === "FILE") {
+              let extractFileName3 = renderFileName(
+                message.content.split(",").toString()
+              );
+              let extractFileExtension = extractFileName3.split(".").reverse();
+              let fileExtension = extractFileExtension[0];
+              if (fileExtension === "mp4")
+                return (
+                  <VideoMessage
+                    key={message.id}
+                    content={message.content.split(",").toString()}
+                    createdAt={format(new Date(message.createdAt), "HH:mm")}
+                    isUser={message.userId !== userId}
+                    conversationId={conversationId}
+                    messageCuid={message.cuid}
+                    photoUrl={photoUrl}
+                  />
+                );
+              else
+                return (
+                  <FileMessage
+                    key={message.id}
+                    content={message.content.split(",").toString()}
+                    createdAt={format(new Date(message.createdAt), "HH:mm")}
+                    isUser={message.userId !== userId}
+                    conversationId={conversationId}
+                    messageCuid={message.cuid}
+                    photoUrl={photoUrl}
+                  />
+                );
             } else {
               return null;
             }
@@ -338,7 +554,7 @@ export default function ChatScreen({ route }) {
             paddingTop: 0,
             paddingBottom: 0,
             justifyContent: "space-between",
-            gap: 15,
+            gap: 10,
           }}
         >
           {/* Sticker button */}
@@ -387,6 +603,13 @@ export default function ChatScreen({ route }) {
             value={messageText}
             onChangeText={(text) => setMessageText(text)}
           />
+          <TouchableOpacity onPress={handlePickFile}>
+            <MaterialCommunityIconsIcon
+              name="file-upload"
+              size={25}
+              color="828282"
+            />
+          </TouchableOpacity>
           <TouchableOpacity onPress={handlePickImages}>
             <MaterialCommunityIconsIcon
               name="file-image"
@@ -394,13 +617,7 @@ export default function ChatScreen({ route }) {
               color="828282"
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={
-              messageType === "IMAGE"
-                ? handleSendImageMessage
-                : handleSendTextMessage
-            }
-          >
+          <TouchableOpacity onPress={handleSendMessage}>
             <MaterialCommunityIconsIcon
               name="send"
               size={25}
@@ -448,6 +665,45 @@ export default function ChatScreen({ route }) {
               </TouchableOpacity>
             </View>
           ))}
+          {selectedFiles.map((fileUri, index) => {
+            const getFileTypeFromUri = (uri) => {
+              if (uri.startsWith("data:")) {
+                const fileType = uri.substring(5, uri.indexOf(";"));
+                return fileType;
+              } else {
+                return null;
+              }
+            };
+            const fileType = getFileTypeFromUri(fileUri);
+
+            console.log(fileType);
+            return (
+              <View
+                style={{
+                  width: "33%",
+                  height: 120,
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  backgroundColor: "white",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    position: "absolute",
+                    top: 5,
+                    right: 5,
+                  }}
+                  onPress={() => handleRemoveFile(index)}
+                >
+                  <OcticonsIcon name="x-circle-fill" size={25} color="#ccc" />
+                </TouchableOpacity>
+                {renderIcon(fileType)}
+              </View>
+            );
+          })}
         </View>
       </View>
     </KeyboardAvoidingView>

@@ -1,5 +1,4 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import React, { useCallback } from "react";
 import { useState, useRef, useEffect } from "react";
 import {
   Text,
@@ -17,14 +16,14 @@ import {
   MaterialCommunityIconsIcon,
   IoniconsIcon,
   MaterialIconsIcon,
-  FontAwesome5Icon,
+  FontAwesomeIcon,
   OcticonsIcon,
   EntypoIcon,
   EvilIconsIcon,
   noAvatar,
 } from "../utils/IconUtils";
 
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Button, KeyboardAvoidingView, ScrollView } from "react-native-web";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import contactApi from "../api/ContactApi";
@@ -48,14 +47,12 @@ export default function ContactScreen({ route }) {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  // render all friend
   const getAllFriend = async () => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const contactData = await contactApi.getAllContact(accessToken);
       const allFriendData = await contactApi.getAllFriend(accessToken);
       const me = await userApi.getMe(accessToken);
-      console.log(contactData);
       setUserId(me.id);
       setContactData(contactData);
       setCloneContactData(contactData);
@@ -64,11 +61,12 @@ export default function ContactScreen({ route }) {
       console.error(error.code);
     }
   };
-  // 2. Fetch danh sách Contact đề xuất
-  useEffect(() => {
-    getAllFriend();
-  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      getAllFriend();
+    }, [])
+  );
   // 3. handle send friend request
   const handleSendFriendRequest = async (friendId) => {
     try {
@@ -110,7 +108,6 @@ export default function ContactScreen({ route }) {
     const filteredItems = conversations.list.filter(
       (item) => !item.isGroup && item.participants[1].id === friendId
     );
-    console.log(accessToken);
     if (filteredItems.length !== 0) {
       navigation.navigate("ChatScreen", {
         conversationId: filteredItems[0].id,
@@ -130,7 +127,6 @@ export default function ContactScreen({ route }) {
         null,
         accessToken
       );
-      console.log(data);
 
       if (data !== "") {
         navigation.navigate("ChatScreen", {
@@ -178,6 +174,7 @@ export default function ContactScreen({ route }) {
       <View
         style={{
           width: "100%",
+          height: 65,
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
@@ -327,18 +324,38 @@ export default function ContactScreen({ route }) {
                 alignItems: "center",
               }}
             >
-              <Image
-                source={{ uri: item.friend.photoUrl }}
+              <View
                 style={{
                   width: 50,
                   height: 50,
                   borderRadius: "50%",
-                  resizeMode: "cover",
-                  backgroundColor: "#ccc",
-                  borderWidth: 1,
-                  borderColor: "#ccc",
+                  backgroundColor: "#fff",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
+              >
+                {item.friend.photoUrl && (
+                  <Image
+                    source={{ uri: item.friend.photoUrl }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      resizeMode: "cover",
+                    }}
+                  ></Image>
+                )}
+
+                {!item.friend.photoUrl && (
+                  <FontAwesomeIcon
+                    name="user-circle"
+                    color="#A0AEC0"
+                    size={50}
+                  ></FontAwesomeIcon>
+                )}
+              </View>
               <View
                 style={{
                   display: "flex",

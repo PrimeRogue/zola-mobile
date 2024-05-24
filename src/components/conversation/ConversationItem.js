@@ -5,7 +5,11 @@ import {
 } from "../../utils/ConversationUtils";
 import { formatDistance } from "date-fns";
 import { Image, TouchableOpacity, View, Text } from "react-native";
-import { EvilIconsIcon } from "../../utils/IconUtils";
+import {
+  EvilIconsIcon,
+  FontAwesome5Icon,
+  FontAwesomeIcon,
+} from "../../utils/IconUtils";
 
 const ConversationItem = ({
   conversation,
@@ -20,6 +24,7 @@ const ConversationItem = ({
     }
     return s.trim();
   };
+
   return (
     <TouchableOpacity
       style={{
@@ -42,23 +47,64 @@ const ConversationItem = ({
           navigation: navigation,
           userId: userId,
           setIsMessagesChanged: setIsMessagesChanged,
+          photoUrl: conversation.participants[1].photoUrl,
         })
       }
     >
-      <Image
-        source={{ uri: conversation.participants[1].photoUrl }}
+      <View
         style={{
           width: 60,
           height: 60,
           borderRadius: "50%",
-          resizeMode: "cover",
           margin: 15,
           marginRight: 20,
-          borderWidth: 2,
-          borderColor: "#ccc",
-          backgroundColor: "#ccc",
+          backgroundColor: "#fff",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      ></Image>
+      >
+        {conversation.groupImage && (
+          <Image
+            source={{ uri: conversation.groupImage }}
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              resizeMode: "cover",
+            }}
+          ></Image>
+        )}
+
+        {conversation.isGroup && (
+          <FontAwesomeIcon
+            name="group"
+            color="#A0AEC0"
+            size={50}
+          ></FontAwesomeIcon>
+        )}
+
+        {!conversation.isGroup && conversation.participants[1].photoUrl && (
+          <Image
+            source={{ uri: conversation.participants[1].photoUrl }}
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              resizeMode: "cover",
+            }}
+          ></Image>
+        )}
+
+        {!conversation.isGroup && !conversation.participants[1].photoUrl && (
+          <FontAwesomeIcon
+            name="user-circle"
+            color="#A0AEC0"
+            size={60}
+          ></FontAwesomeIcon>
+        )}
+      </View>
       <View>
         <Text style={{ fontSize: 18, fontWeight: 500 }}>
           {conversation?.isGroup

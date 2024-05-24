@@ -12,6 +12,8 @@ import TooltipMessage from "./src/components/message/TooltipMessage";
 import CreateGroupScreen from "./src/screens/CreateGroupScreen";
 import MemberGroupScreen from "./src/screens/MemberGroupScreen";
 import ContactScreen from "./src/screens/ContactScreen";
+import ConversationScreen from "./src/screens/ConversationScreen";
+import VideoCallScreen from "./src/screens/VideoCallScreen";
 
 const Stack = createStackNavigator();
 const screenComponents = {
@@ -20,9 +22,10 @@ const screenComponents = {
   RegisterScreen,
   BottomTabNavigator,
   ChatScreen,
+  MemberGroupScreen,
   FriendRequestScreen,
   CreateGroupScreen,
-  MemberGroupScreen,
+  VideoCallScreen,
   // ImagePickerExample,
 };
 export default function App() {
@@ -39,7 +42,6 @@ export default function App() {
         ))}
       </Stack.Navigator>
     </NavigationContainer>
-    // <ContactScreen></ContactScreen>
   );
 }
 

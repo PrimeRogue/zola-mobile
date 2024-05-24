@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useState, useRef, useEffect } from "react";
 import { Text, View, Image, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import authAPI from "../api/AuthApi";
@@ -33,7 +33,7 @@ export default function ConversationScreen({ route }) {
   //   const fetchDataAndSetToken = async () => {
   //     try {
   //       const data = await authAPI.login({
-  //         email: "linh1@livegency.com",
+  //         email: "buitranthienan1111@gmail.com",
   //         password: "123456",
   //       });
   //       setAccessToken(data.access_token);
@@ -61,9 +61,12 @@ export default function ConversationScreen({ route }) {
     }
   };
 
-  useEffect(() => {
-    fetchConversationList();
-  }, [accessToken]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchConversationList();
+    }, [])
+  );
+
   useEffect(() => {
     fetchConversationList();
     setIsMessagesChanged(false);
@@ -86,6 +89,7 @@ export default function ConversationScreen({ route }) {
       <View
         style={{
           width: "100%",
+          height: 65,
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
@@ -94,26 +98,10 @@ export default function ConversationScreen({ route }) {
           padding: 20,
         }}
       >
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 30,
-          }}
-        >
+        <TouchableOpacity>
           <AntDesignIcon name="search1" size={18} color="#fff" />
-          <Text style={{ color: "#eee", fontSize: 18 }}>Search</Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 30,
-          }}
           onPress={() =>
             navigation.navigate("CreateGroupScreen", {
               navigation,
@@ -121,7 +109,7 @@ export default function ConversationScreen({ route }) {
             })
           }
         >
-          <AntDesignIcon name="addusergroup" size={25} color="#fff" />
+          <AntDesignIcon name="addusergroup" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
       <View

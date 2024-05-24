@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/v1/conversations";
+const API_URL = "https://zola-api.tranloc.click/api/v1/conversations";
 
 const conversationApi = {
   //17
@@ -61,8 +61,72 @@ const conversationApi = {
     }
   },
   //23
+  callVideo: async (conversationId, content, access_token) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/${conversationId}/startVideoCall`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create conversation");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
   //28
+  deleteGroup: async (conversationId, access_token) => {
+    try {
+      const response = await fetch(`${API_URL}/group/${conversationId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete member");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
   //32
+  addMemberGroup: async (conversationId, participantIds, access_token) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/${conversationId}/group-member`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ participantIds }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete member");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
   //36
   deleteMemberGroup: async (conversationId, userId, access_token) => {
     try {
@@ -155,7 +219,6 @@ const conversationApi = {
         method: "POST",
         headers: {
           Authorization: `Bearer ${access_token}`,
-          // "Content-Type": "multipart/form-data",
         },
         body: formData,
       });
@@ -171,6 +234,25 @@ const conversationApi = {
   },
   //57
   //58
+  sendFileMessage: async (conversationId, formData, access_token) => {
+    try {
+      const response = await fetch(`${API_URL}/${conversationId}/file`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send file message");
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
   //65
 };
 

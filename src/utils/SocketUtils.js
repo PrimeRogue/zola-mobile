@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-const SOCKET_URL = "ws://localhost:8081/";
+const SOCKET_URL = "wss://zola-api.tranloc.click/";
 const appendPath = (path) => {
   return path.startsWith("/") ? path.slice(1, path.length) : path;
 };

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/v1/users/me";
+const API_URL = "https://zola-api.tranloc.click/api/v1/users/me";
 
 const userApi = {
   getMe: async (access_token) => {

@@ -1,8 +1,28 @@
 import React from "react";
 import { useState } from "react";
-import { View, Text, Image, Dimensions } from "react-native";
+import { View, Text, Image, Dimensions, TouchableOpacity } from "react-native";
 import Lightbox from "react-native-lightbox";
-const ImageMessage = ({ content, createdAt, isUser }) => {
+import { AntDesignIcon, FontAwesomeIcon } from "../../utils/IconUtils";
+import { Platform } from "react-native";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+
+async function handleDownloadImage(uri) {
+  if (Platform.OS === "web") {
+    window.open(uri);
+  } else {
+    const fileUri = FileSystem.documentDirectory + uri.split("/").pop();
+    const result = await FileSystem.downloadAsync(uri, fileUri);
+
+    if (result && result.uri) {
+      if (Platform.OS === "ios" || Platform.OS === "android") {
+        await Sharing.shareAsync(result.uri);
+      }
+    }
+  }
+}
+
+const ImageMessage = ({ content, createdAt, isUser, photoUrl }) => {
   return !isUser ? (
     <View
       style={{
@@ -10,7 +30,7 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
         borderWidth: 1,
         borderColor: "#ccc",
         padding: 10,
-        backgroundColor: "#D5F1FF",
+        backgroundColor: "#fff",
         display: "flex",
         flexDirection: "column",
         gap: 5,
@@ -33,7 +53,18 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
           }}
         />
       </Lightbox>
-      <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
+        <TouchableOpacity onPress={() => handleDownloadImage(content.uri)}>
+          <AntDesignIcon name="download" size={20} color="teal" />
+        </TouchableOpacity>
+      </View>
     </View>
   ) : (
     <View
@@ -47,18 +78,37 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
         width: "70%",
       }}
     >
-      <Image
-        source={content}
+      <View
         style={{
           width: 50,
           height: 50,
           borderRadius: "50%",
-          resizeMode: "cover",
-          backgroundColor: "white",
-          borderWidth: 1,
-          borderColor: "#ccc",
+          backgroundColor: "#fff",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        {photoUrl && (
+          <Image
+            source={{ uri: photoUrl }}
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              resizeMode: "cover",
+            }}
+          ></Image>
+        )}
+        {!photoUrl && (
+          <FontAwesomeIcon
+            name="user-circle"
+            color="#A0AEC0"
+            size={50}
+          ></FontAwesomeIcon>
+        )}
+      </View>
       <View
         style={{
           borderRadius: 10,
@@ -87,7 +137,18 @@ const ImageMessage = ({ content, createdAt, isUser }) => {
             }}
           />
         </Lightbox>
-        <Text style={{ fontSize: 16, color: "#ccc" }}>15:04</Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
+          <TouchableOpacity onPress={() => handleDownloadImage(content.uri)}>
+            <AntDesignIcon name="download" size={20} color="teal" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

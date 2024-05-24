@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/v1/auth";
+const API_URL = "https://zola-api.tranloc.click/api/v1/auth";
 
 const authAPI = {
   login: async (credentials) => {

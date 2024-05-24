@@ -2,12 +2,14 @@ import React, { useRef, useState } from "react";
 import { View, Text, Image } from "react-native";
 import TooltipMessage from "./TooltipMessage";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { FontAwesomeIcon } from "../../utils/IconUtils";
 const TextMessage = ({
   content,
   createdAt,
   isUser,
   messageCuid,
   conversationId,
+  photoUrl,
 }) => {
   const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   return !isUser ? (
@@ -23,7 +25,7 @@ const TextMessage = ({
           borderWidth: 1,
           borderColor: "#ccc",
           padding: 10,
-          backgroundColor: "#D5F1FF",
+          backgroundColor: "#fff",
           display: "flex",
           flexDirection: "column",
           gap: 5,
@@ -60,18 +62,38 @@ const TextMessage = ({
         maxWidth: "70%",
       }}
     >
-      <Image
-        // source={require("https://source.unsplash.com/random")}
+      <View
         style={{
           width: 50,
           height: 50,
           borderRadius: "50%",
-          resizeMode: "cover",
-          backgroundColor: "white",
-          borderWidth: 1,
-          borderColor: "#ccc",
+          backgroundColor: "#fff",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        {photoUrl && (
+          <Image
+            source={{ uri: photoUrl }}
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              resizeMode: "cover",
+            }}
+          ></Image>
+        )}
+
+        {!photoUrl && (
+          <FontAwesomeIcon
+            name="user-circle"
+            color="#A0AEC0"
+            size={50}
+          ></FontAwesomeIcon>
+        )}
+      </View>
 
       <View style={{ display: "flex", direction: "column", gap: 10 }}>
         <TouchableOpacity

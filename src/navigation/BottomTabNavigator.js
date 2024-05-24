@@ -33,11 +33,7 @@ const BottomTabNavigator = ({ route }) => {
         name="Tin nhắn"
         component={ConversationScreen}
         options={{ headerShown: false }}
-        initialParams={
-          {
-            //   email: email,
-          }
-        }
+        initialParams={{}}
       />
       <Tab.Screen
         name="Danh bạ"
