@@ -31,13 +31,13 @@ const TooltipMessage = ({ messageCuid, conversationId, content, isUser }) => {
 
   const handleReplyMessage = async () => {
     try {
+      setEnableReply(false);
       const storedAccessToken = await AsyncStorage.getItem("accessToken");
       const data = await conversationApi.sendTextMessage(
         conversationId,
         content + "type:REPLY" + replyText,
         storedAccessToken
       );
-      setEnableReply(false);
     } catch (error) {
       console.error(error.message + "--" + error.code);
     }
@@ -80,7 +80,7 @@ const TooltipMessage = ({ messageCuid, conversationId, content, isUser }) => {
         <View
           style={{
             padding: 10,
-            borderRadius: 10,
+            borderRadius: 5,
             display: "flex",
             flexDirection: "row",
             alignItems: "stretch",

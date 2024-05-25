@@ -59,7 +59,7 @@ const TextMessage = ({
         gap: 10,
         marginTop: 15,
         marginBottom: 15,
-        maxWidth: "70%",
+        maxWidth: "90%",
       }}
     >
       <View

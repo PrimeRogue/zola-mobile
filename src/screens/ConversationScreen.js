@@ -27,25 +27,6 @@ export default function ConversationScreen({ route }) {
   const [accessToken, setAccessToken] = useState("");
   const [userId, setUserId] = useState("");
 
-  // 1. Sau khi đăng nhập --> set Token
-  // * Xoá code này: code này để test
-  // useEffect(() => {
-  //   const fetchDataAndSetToken = async () => {
-  //     try {
-  //       const data = await authAPI.login({
-  //         email: "buitranthienan1111@gmail.com",
-  //         password: "123456",
-  //       });
-  //       setAccessToken(data.access_token);
-  //       // Lưu access token vào AsyncStorage
-  //       await AsyncStorage.setItem("accessToken", data.access_token);
-  //     } catch (error) {
-  //       console.error("Lỗi khi lưu token vào AsyncStorage:", error);
-  //     }
-  //   };
-  //   fetchDataAndSetToken();
-  // }, []);
-  // 2. Fetch danh sách conversation khi accessToken thay đổi
   const fetchConversationList = async () => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");

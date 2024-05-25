@@ -75,7 +75,7 @@ const ImageMessage = ({ content, createdAt, isUser, photoUrl }) => {
         gap: 10,
         marginTop: 15,
         marginBottom: 15,
-        width: "70%",
+        width: "90%",
       }}
     >
       <View

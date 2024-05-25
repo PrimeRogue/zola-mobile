@@ -9,24 +9,25 @@ import {
   Linking,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 import {
   AntDesignIcon,
   FontAwesomeIcon,
   MaterialIconsIcon,
 } from "../../utils/IconUtils";
-
-const downloadFileWeb = (uri) => {
-  const link = document.createElement("a");
-  link.href = uri;
-  link.download = uri.substring(uri.lastIndexOf("/") + 1);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-const handleDownload = (content) => {
-  if (Platform.OS === "web") {
-    console.log("yes");
-    downloadFileWeb(content);
+const handleDownloadFile = async (uri) => {
+  console.log("tes");
+  try {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== "granted") {
+      return;
+    }
+    const fileUri = `${FileSystem.documentDirectory}${uri.split("/").pop()}`;
+    const { uri: downloadedUri } = await FileSystem.downloadAsync(uri, fileUri);
+    const asset = await MediaLibrary.createAssetAsync(downloadedUri);
+    await MediaLibrary.createAlbumAsync("Downloaded Images", asset, false);
+  } catch (error) {
+    console.error(error);
   }
 };
 const renderFileName = (content) => {
@@ -121,7 +122,7 @@ const FileMessage = ({ content, createdAt, isUser, photoUrl }) => {
         gap: 10,
         marginTop: 15,
         marginBottom: 15,
-        width: "70%",
+        width: "90%",
       }}
     >
       <View
@@ -147,6 +148,7 @@ const FileMessage = ({ content, createdAt, isUser, photoUrl }) => {
             }}
           ></Image>
         )}
+
         {!photoUrl && (
           <FontAwesomeIcon
             name="user-circle"
@@ -161,28 +163,40 @@ const FileMessage = ({ content, createdAt, isUser, photoUrl }) => {
           borderWidth: 1,
           borderColor: "#ccc",
           padding: 10,
-          backgroundColor: "white",
+          backgroundColor: "#fff",
           display: "flex",
           flexDirection: "column",
-          gap: 10,
-          width: "fit-content",
+          gap: 5,
+          width: "70%",
           alignSelf: "flex-start",
           flexGrow: 1,
         }}
       >
-        <TouchableOpacity onPress={() => handleDownload(content)}>
-          <Image
-            source={content}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            width: "100%",
+          }}
+        >
+          {renderIcon(content)}
+          <View
             style={{
-              maxWidth: "100%",
-              width: "100%",
-              height: 250,
-              maxHeight: "100%",
-              borderRadius: 10,
-              resizeMode: "contain",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              gap: 5,
             }}
-          />
-        </TouchableOpacity>
+          >
+            <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+              {renderFileName(content)}
+            </Text>
+            <TouchableOpacity onPress={() => handleDownloadFile(content)}>
+              <AntDesignIcon name="download" size={20} color="teal" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <Text style={{ fontSize: 16, color: "#ccc" }}>{createdAt}</Text>
       </View>
     </View>

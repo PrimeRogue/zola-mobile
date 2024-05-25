@@ -50,7 +50,6 @@ export default function ChatScreen({ route }) {
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [dataReceived, setDataReceived] = useState({});
-  const [me, setMe] = useState(null);
 
   const [socket, setSocket] = useState({
     rootSocket: null,
@@ -162,72 +161,6 @@ export default function ChatScreen({ route }) {
     setMessageType("TEXT");
   };
 
-  const handleSendFileMessage = async () => {
-    try {
-      const files = [];
-      for (let i = 0; i < selectedFiles.length; i++) {
-        if (/^data:application\/pdf;base64,/.test(selectedFiles[i])) {
-          // If the base64 data starts with 'data:application/pdf;base64,', remove the header
-          const base64Data = selectedFiles[i].replace(
-            /^data:application\/pdf;base64,/,
-            ""
-          );
-          const file = base64toFile(base64Data, "file.pdf");
-          files.push(file);
-        } else if (/^data:application\/msword;base64,/.test(selectedFiles[i])) {
-          // If the base64 data starts with 'data:application/msword;base64,', remove the header
-          const base64Data = selectedFiles[i].replace(
-            /^data:application\/msword;base64,/,
-            ""
-          );
-          const file = base64toFile(base64Data, "file.doc");
-          files.push(file);
-        } else if (
-          /^data:application\/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,/.test(
-            selectedFiles[i]
-          )
-        ) {
-          const base64Data = selectedFiles[i].replace(
-            /^data:application\/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,/,
-            ""
-          );
-          const file = base64toFile(base64Data, "file.docx");
-          files.push(file);
-        } else if (/^data:video\/mp4;base64,/.test(selectedFiles[i])) {
-          // If the base64 data starts with 'data:video/mp4;base64,', remove the header
-          const base64Data = selectedFiles[i].replace(
-            /^data:video\/mp4;base64,/,
-            ""
-          );
-          const file = base64toFile(base64Data, "video.mp4");
-          files.push(file);
-        } else if (/^data:text\/plain;base64,/.test(selectedFiles[i])) {
-          const base64Data = selectedFiles[i].replace(
-            /^data:text\/plain;base64,/,
-            ""
-          );
-          const file = base64toFile(base64Data, "file.txt");
-          files.push(file);
-        } else {
-          console.error("Invalid base64 format:", selectedFiles[i]);
-        }
-      }
-
-      const storedAccessToken = await AsyncStorage.getItem("accessToken");
-      files.forEach(async (item) => {
-        const formData = new FormData();
-        formData.append("file", item);
-        const data = await conversationApi.sendFileMessage(
-          conversationId,
-          formData,
-          storedAccessToken
-        );
-      });
-    } catch (error) {
-      console.error(error.message + "--" + error.code);
-    }
-    setMessageType("TEXT");
-  };
   // Xử lý các event socket
   useEffect(() => {
     if (socket.chatSocket) {
@@ -451,17 +384,17 @@ export default function ChatScreen({ route }) {
               return (
                 <ReplyTextMessage
                   key={message.id}
-                  content={{ uri: message.content.split(",").toString() }}
+                  content={message.content}
                   createdAt={format(new Date(message.createdAt), "HH:mm")}
                   isUser={message.userId !== userId}
                   conversationId={conversationId}
                   messageCuid={message.cuid}
+                  photoUrl={photoUrl}
                 ></ReplyTextMessage>
               );
             } else if (message.typeMessage === "TEXT") {
               return (
                 <TextMessage
-                  key={message.id}
                   content={message.content}
                   createdAt={format(new Date(message.createdAt), "HH:mm")}
                   isUser={message.userId !== userId}
@@ -473,7 +406,6 @@ export default function ChatScreen({ route }) {
             } else if (message.typeMessage === "IMAGE") {
               return (
                 <ImageMessage
-                  key={message.id}
                   content={{ uri: message.content.split(",").toString() }}
                   createdAt={format(new Date(message.createdAt), "HH:mm")}
                   isUser={message.userId !== userId}
@@ -485,7 +417,6 @@ export default function ChatScreen({ route }) {
             } else if (message.typeMessage === "VIDEO") {
               return (
                 <VideoMessage
-                  key={message.id}
                   content={message.content.split(",").toString()}
                   createdAt={format(new Date(message.createdAt), "HH:mm")}
                   isUser={message.userId !== userId}
@@ -503,7 +434,6 @@ export default function ChatScreen({ route }) {
               if (fileExtension === "mp4")
                 return (
                   <VideoMessage
-                    key={message.id}
                     content={message.content.split(",").toString()}
                     createdAt={format(new Date(message.createdAt), "HH:mm")}
                     isUser={message.userId !== userId}
@@ -515,7 +445,6 @@ export default function ChatScreen({ route }) {
               else
                 return (
                   <FileMessage
-                    key={message.id}
                     content={message.content.split(",").toString()}
                     createdAt={format(new Date(message.createdAt), "HH:mm")}
                     isUser={message.userId !== userId}

@@ -21,7 +21,7 @@ export default function AuthScreen({ route }) {
       }}
     >
       {/* Zalo logo */}
-      <Text style={{ fontSize: "40px", color: "teal", fontWeight: "bold" }}>
+      <Text style={{ fontSize: 40, color: "teal", fontWeight: "bold" }}>
         Zola
       </Text>
       {/* Slider */}
@@ -66,7 +66,7 @@ export default function AuthScreen({ route }) {
                 height: 260,
                 resizeMode: "contain",
                 borderBottomWidth: 1,
-                borderBottomColor: "#ccc",
+                borderColor: "#ccc",
               }}
             />
             <Text
@@ -155,7 +155,7 @@ export default function AuthScreen({ route }) {
           <Text
             style={{
               fontWeight: 500,
-              borderBottomColor: isEN == false ? "#000" : "",
+              borderColor: isEN == false ? "#000" : "#fff",
               borderBottomWidth: isEN == false ? 1 : 0,
               paddingBottom: 5,
               fontSize: 16,
@@ -168,7 +168,7 @@ export default function AuthScreen({ route }) {
           <Text
             style={{
               fontWeight: 500,
-              borderBottomColor: isEN == true ? "#000" : "",
+              borderColor: isEN == true ? "#000" : "#fff",
               borderBottomWidth: isEN == true ? 1 : 0,
               paddingBottom: 5,
               fontSize: 16,
@@ -216,7 +216,9 @@ const authScreenSlider = [
   },
   {
     id: "4",
-    image: require("../../assets/Auth/1.PNG"),
+    image: {
+      uri: "https://res.cloudinary.com/drqbhj6ft/image/upload/v1713484698/1_ae8hsg.png",
+    },
     title: "Gọi video ổn định",
     desc: "Trò chuyện thật đã với chất lượng video ổn định mọi lúc, mọi nơi",
     titleTran: "Stable video calling",

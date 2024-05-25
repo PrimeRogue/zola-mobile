@@ -1,127 +1,234 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import userApi from "../api/UserApi";
+import { FontAwesomeIcon } from "../utils/IconUtils";
+import { useFocusEffect } from "@react-navigation/native";
 
 const PersonalScreen = () => {
-  const [me, setMe] = useState(null);
+  const [me, setMe] = useState({});
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [dob, setDob] = useState("");
+  const [isUpdated, setIsUpdated] = useState(false);
 
-  useEffect(() => {
-    const getMe = async () => {
-      try {
-        const accessToken = await AsyncStorage.getItem("accessToken");
-        const me = await userApi.getMe(accessToken);
-        setMe(me);
-      } catch (error) {
-        console.error(error.code);
-      }
-    };
+  const getMe = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const me = await userApi.getMe(accessToken);
+      console.log(me);
+      setMe(me);
+    } catch (error) {
+      console.error(error.code);
+    }
+  };
 
-    getMe();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getMe();
+      setIsUpdated(false);
+    }, [])
+  );
 
-  if (!me) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
-
+  const handleUpdateBio = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      setIsUpdated(true);
+      const data = await userApi.updateUser(accessToken, name, dob, bio);
+    } catch (error) {
+      console.error(error.code);
+    }
+  };
   return (
-    <View style={styles.container}>
-      <View style={styles.profileContainer}>
-        <Image source={{ uri: me.photoUrl }} style={styles.photo} />
-        <Text style={styles.displayName}>{me.displayName}</Text>
-        <Text style={styles.email}>{me.email}</Text>
-        <Text style={styles.createdAt}>Joined: {formatDate(me.createdAt)}</Text>
+    <View
+      style={{
+        height: "100vh",
+        backgroundColor: "#fff",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <View
+        style={{ height: "30vh", width: "100%", backgroundColor: "teal" }}
+      ></View>
+      <View style={{ height: "70vh", width: "100%" }}></View>
+      <View
+        style={{
+          width: 150,
+          height: 150,
+          borderRadius: "50%",
+          backgroundColor: "#fff",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          left: "50%",
+          transform: "translate(-50%, -140%)",
+        }}
+      >
+        {me.photoUrl && (
+          <Image
+            source={{ uri: me.photoUrl }}
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              resizeMode: "cover",
+            }}
+          ></Image>
+        )}
+
+        {!me.photoUrl && (
+          <FontAwesomeIcon
+            name="user-circle"
+            color="#A0AEC0"
+            size={150}
+          ></FontAwesomeIcon>
+        )}
       </View>
-      {me.bio && (
-        <View style={styles.bioContainer}>
-          <Text style={styles.bio}>{me.bio}</Text>
+      <View
+        style={{
+          width: "100%",
+          backgroundColor: "#fff",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
+          bottom: 55,
+          padding: 15,
+        }}
+      >
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", color: "teal" }}>
+            Tên:
+          </Text>
+          <TextInput
+            style={{
+              height: 40,
+              width: "70%",
+              backgroundColor: "transparent",
+              color: "#8C8F91",
+              fontSize: 18,
+              borderColor: "#ccc",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingLeft: 5,
+            }}
+            placeholder={me.displayName}
+            // value={me.displayName}
+            onChangeText={(text) => setName(text)}
+          />
         </View>
-      )}
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", color: "teal" }}>
+            Email:
+          </Text>
+          <TextInput
+            style={{
+              height: 40,
+              width: "70%",
+              backgroundColor: "transparent",
+              color: "#8C8F91",
+              fontSize: 18,
+              borderColor: "#ccc",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingLeft: 5,
+            }}
+            placeholder={me.email}
+            // value={me.displayName}
+            // onChangeText={(text) => setMessageText(text)}
+          />
+        </View>
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", color: "teal" }}>
+            Bio:
+          </Text>
+          <TextInput
+            multiline={true}
+            numberOfLines={4}
+            style={{
+              height: 100,
+              width: "70%",
+              backgroundColor: "transparent",
+              color: "#8C8F91",
+              fontSize: 18,
+              borderColor: "#ccc",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingLeft: 5,
+            }}
+            placeholder={me.bio}
+            // value={me.displayName}
+            onChangeText={(text) => setBio(text)}
+          />
+        </View>
+        <TouchableOpacity
+          style={{
+            height: 40,
+            width: "fit-content",
+            borderRadius: 7,
+            padding: 7,
+            paddingLeft: 15,
+            paddingRight: 15,
+            backgroundColor: isUpdated ? "#ccc" : "teal",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onPress={handleUpdateBio}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "450", color: "#fff" }}>
+            Cập nhật
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-};
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f9f9f9",
-    padding: 20,
-  },
-  profileContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  bioContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    marginTop: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  photo: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 20,
-  },
-  displayName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
-  },
-  email: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: "#555",
-  },
-  createdAt: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: "#777",
-  },
-  bio: {
-    fontSize: 16,
-    color: "#444",
-  },
-  loadingText: {
-    fontSize: 18,
-    color: "#777",
-  },
-});
 
 export default PersonalScreen;
